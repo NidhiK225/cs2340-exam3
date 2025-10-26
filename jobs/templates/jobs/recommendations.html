@@ -25,11 +25,11 @@
         </div>
 
         <div class="small text-secondary mt-2">
-          Matched Skills:
-          {% with job_skills=job.skills.all candidate_skills=c.skills.all %}
-            {% if job_skills and candidate_skills %}
-              {% for s in job_skills %}
-                {% if s in candidate_skills %}
+          Matched s:
+          {% with job_s=job.s.all candidate_s=c.s.all %}
+            {% if job_s and candidate_s %}
+              {% for s in job_s %}
+                {% if s in candidate_s %}
                   <span class="badge text-bg-light me-1">{{ s.name }}</span>
                 {% endif %}
               {% endfor %}
@@ -45,7 +45,7 @@
       </div>
     </div>
   {% empty %}
-    <p>No matching candidates found yet. Try adding skills or adjusting minimum experience.</p>
+    <p>No matching candidates found yet. Try adding s or adjusting minimum experience.</p>
   {% endfor %}
 </div>
 {% endblock %}

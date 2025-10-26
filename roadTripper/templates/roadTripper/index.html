@@ -20,11 +20,11 @@
                     value="{{ request.GET.location }}">
             </div>
             <div class="col-md-3">
-              <input type="text" class="form-control" name="skill" list="skillsList"
-                    placeholder="Search by skill"
-                    value="{{ request.GET.skill }}">
-              <datalist id="skillsList">
-                {% for s in template_data.all_skills %}
+              <input type="text" class="form-control" name="" list="sList"
+                    placeholder="Search by "
+                    value="{{ request.GET. }}">
+              <datalist id="sList">
+                {% for s in template_data.all_s %}
                   <option value="{{ s }}"></option>
                 {% endfor %}
               </datalist>
@@ -76,8 +76,8 @@
                       {% if candidateSearch.location %}
                         <span class="badge text-bg-light me-1 mb-1">Location: {{ candidateSearch.location }}</span>
                       {% endif %}
-                      {% if candidateSearch.skill %}
-                        <span class="badge text-bg-light me-1 mb-1">Skill: {{ candidateSearch.skill }}</span>
+                      {% if candidateSearch. %}
+                        <span class="badge text-bg-light me-1 mb-1">: {{ candidateSearch. }}</span>
                       {% endif %}
                       {% if candidateSearch.experience %}
                         <span class="badge text-bg-light me-1 mb-1">Experience: {{ candidateSearch.experience }}</span>

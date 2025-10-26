@@ -174,27 +174,27 @@
         </div>
       </div>
 
-      <!-- Skills (searchable picker) -->
+      <!-- s (searchable picker) -->
       <div class="row align-items-start mb-3">
-        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Required Skills</label></div>
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Required s</label></div>
         <div class="col-sm-8 col-lg-9">
-          <input type="text" class="form-control mb-2" id="skillsSearch" placeholder="Search skills..." list="skillsMasterList">
-          <datalist id="skillsMasterList">
-            {% for s in all_skills %}
+          <input type="text" class="form-control mb-2" id="sSearch" placeholder="Search s..." list="sMasterList">
+          <datalist id="sMasterList">
+            {% for s in all_s %}
               <option value="{{ s }}"></option>
             {% endfor %}
           </datalist>
-          <div class="d-none" id="skillsSelectWrapper">{{ form.skills }}</div>
-          {{ form.skills.errors }}
-          <div id="skillsPicker" class="border rounded p-2" style="max-height: 260px; overflow:auto;"></div>
-          <div id="skillsSelected" class="mt-2"></div>
+          <div class="d-none" id="sSelectWrapper">{{ form.s }}</div>
+          {{ form.s.errors }}
+          <div id="sPicker" class="border rounded p-2" style="max-height: 260px; overflow:auto;"></div>
+          <div id="sSelected" class="mt-2"></div>
         </div>
       </div>
 
-      <!-- New skills (create on-the-fly) -->
+      <!-- New s (create on-the-fly) -->
       <div class="row align-items-center mb-3">
-        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Add New Skills</label></div>
-        <div class="col-sm-8 col-lg-9">{{ form.new_skills }}<div class="form-text">{{ form.new_skills.help_text }}</div>{{ form.new_skills.errors }}</div>
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Add New s</label></div>
+        <div class="col-sm-8 col-lg-9">{{ form.new_s }}<div class="form-text">{{ form.new_s.help_text }}</div>{{ form.new_s.errors }}</div>
       </div>
     </div>
 
@@ -213,13 +213,13 @@
     formEl.querySelectorAll('select').forEach(el => { el.classList.add('form-select'); el.classList.add('w-100'); });
   })();
 
-  // Build a searchable, accessible skills picker that syncs with the hidden select
+  // Build a searchable, accessible s picker that syncs with the hidden select
   (function() {
-    const wrapper = document.getElementById('skillsSelectWrapper');
+    const wrapper = document.getElementById('sSelectWrapper');
     const select = wrapper ? wrapper.querySelector('select') : null;
-    const list = document.getElementById('skillsPicker');
-    const search = document.getElementById('skillsSearch');
-    const chips = document.getElementById('skillsSelected');
+    const list = document.getElementById('sPicker');
+    const search = document.getElementById('sSearch');
+    const chips = document.getElementById('sSelected');
     if (!select || !list) return;
 
     function render() {
@@ -228,7 +228,7 @@
       Array.from(select.options).forEach(opt => {
         const label = opt.text || '';
         if (term && !label.toLowerCase().includes(term)) return;
-        const id = 'skill_' + opt.value;
+        const id = '_' + opt.value;
         const item = document.createElement('div');
         item.className = 'form-check mb-1';
         item.innerHTML = `
@@ -253,7 +253,7 @@
         b.title = 'Click to remove';
         b.addEventListener('click', () => {
           opt.selected = false;
-          const cb = document.getElementById('skill_' + opt.value);
+          const cb = document.getElementById('_' + opt.value);
           if (cb) cb.checked = false;
           renderChips();
         });

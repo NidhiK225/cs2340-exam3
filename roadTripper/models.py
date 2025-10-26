@@ -3,12 +3,9 @@ from django.db import models
 from django.conf import settings  # use settings.AUTH_USER_MODEL
 from django.urls import reverse
 
-class Skill(models.Model):
-    # your admin used `name` earlier; standardize on `name`
-    name = models.CharField(max_length=255, unique=True)
-    def __str__(self): return self.name
 
 class roadTripper(models.Model):
+    
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="roadTripper_profile"
     )
@@ -16,30 +13,29 @@ class roadTripper(models.Model):
     # general personal information
     firstName = models.CharField("First Name", max_length=255)
     lastName  = models.CharField("Last Name", max_length=255)
-    location  = models.CharField("Location", max_length=255, blank=True)
+    location  = models.CharField("Home Location", max_length=255, blank=True)
     image     = models.ImageField("Profile Image", upload_to='roadTripper_images/', null=True, blank=True)
 
-    # matching-related fields
-    years_experience = models.PositiveIntegerField(null=True, blank=True)
-    open_to_work = models.BooleanField(default=True)
-    desired_salary_min = models.PositiveIntegerField(null=True, blank=True)
-    desired_salary_max = models.PositiveIntegerField(null=True, blank=True)
+    # travel-related
+    TRAVEL_BUDGET_CHOICES = [
+        ('LOW', 'Budget-Friendly (Under $50/day)'),
+        ('MID', 'Mid-Range (Approx. $50 - $150/day)'),
+        ('HIGH', 'Luxury (Over $150/day)'),
+        ('FLEX', 'Flexible / Varies'),
+    ]
+    travel_headline = models.CharField("Travel Tagline", max_length=255, blank=True,
+        help_text="A short, catchy phrase about your travel style."
+    )
+    travel_budget = models.CharField("Travel Budget", max_length=4, choices=TRAVEL_BUDGET_CHOICES, default='MID')
+    interests = models.ManyToManyField("Interest", related_name="trippers_with_interest", blank=True)
+    destinations = models.ManyToManyField("Destination", related_name="trippers_want_to_visit", blank=True)
 
-    # education
-    education = models.ForeignKey("Institution", on_delete=models.PROTECT, related_name="roadTripper", null=True, blank=True)
-    degree    = models.CharField(max_length=255, blank=True)
-    startYear = models.IntegerField("Start Year", null=True, blank=True)
-    endYear   = models.IntegerField("End Year", null=True, blank=True)
-
-    # professional
-    headline   = models.TextField(blank=True)
-    experience = models.ManyToManyField("Experience", related_name="roadTripper", blank=True)
-    skills     = models.ManyToManyField("Skill", related_name="roadTripper", blank=True)
-    links      = models.ManyToManyField("Link", related_name="roadTripper", blank=True)
+    links = models.ManyToManyField("Link", related_name="roadTripper", blank=True)
 
     #privacy
     hide_image = models.BooleanField(default=False)
-    hide_headline = models.BooleanField(default=False)
+    hide_travel_headline = models.BooleanField(default=False)
+    hide_travel_budget = models.BooleanField(default=False)
     hide_profile = models.BooleanField(default=False)
     hide_location = models.BooleanField(default=False)
 
@@ -53,42 +49,24 @@ class roadTripper(models.Model):
     def full_name(self):
         return f"{self.firstName} {self.lastName}"
 
-
-class Institution(models.Model):
-    name     = models.CharField(max_length=255)
-    location = models.CharField(max_length=255, blank=True)
+class Interest(models.Model):
+    """Specific travel interests (e.g., 'Hiking', 'Cuisine', 'History', 'Adventure')."""
+    name = models.CharField(max_length=100, unique=True)
     def __str__(self): return self.name
 
-
-class Experience(models.Model):
-    name        = models.CharField("Company", max_length=255)
-    location    = models.CharField(max_length=255, blank=True)
-    startDate   = models.CharField("Start Date (mm/yyyy)", max_length=7)
-    endDate     = models.CharField("End Date (mm/yyyy)", max_length=7, blank=True)
-    description = models.TextField(blank=True)
-    def __str__(self): return self.name
+class Destination(models.Model):
+    """Desired travel locations (e.g., 'Kyoto', 'Patagonia', 'Paris')."""
+    city = models.CharField(max_length=100, blank=True)
+    country = models.CharField(max_length=100)
+    
+    def __str__(self):
+        if self.city:
+            return f"{self.city}, {self.country}"
+        return self.country
 
 class Link(models.Model):
     url        = models.URLField()
     def __str__(self): return self.url
-
-class CandidateSearch(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,           # maps to the recruiter's user
-        on_delete=models.CASCADE,
-        related_name="candidate_searches",
-    )
-    nameHeadline = models.CharField("Name or Headline", max_length=255)
-    date = models.DateField(auto_now_add=True)
-    location = models.CharField(max_length=255)
-    skill = models.CharField(max_length=255)
-    experience = models.CharField(max_length=255)
-
-    matches = models.ManyToManyField(roadTripper, related_name="matched_searches", blank=True)
-
-    def __str__(self): return str(self.id)
-
 
 class Notification(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,

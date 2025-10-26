@@ -8,4 +8,4 @@ class JobAdmin(admin.ModelAdmin):
     list_filter = ("remote_type", "visa_sponsorship", "location")
     search_fields = ("title", "description", "location")
     autocomplete_fields = ("created_by",)
-    filter_horizontal = ("skills",)
+    filter_horizontal = ("s",)

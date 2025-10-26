@@ -40,9 +40,9 @@ INSTALLED_APPS = [
     'home',
     'roadTripper',
     'accounts',
-    'jobs',
     'django_filters',
-    'map',
+    # 'jobs',
+    # 'map',
     # 'cart',
 ]
 

@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from roadTripper.models import Skill
 
 class Job(models.Model):
     class RemoteType(models.TextChoices):
@@ -18,8 +17,6 @@ class Job(models.Model):
     salary_max = models.PositiveIntegerField(null=True, blank=True)
     visa_sponsorship = models.BooleanField(default=False)
     min_experience = models.PositiveIntegerField(null=True, blank=True)
-
-    skills = models.ManyToManyField(Skill, blank=True, related_name="jobs")
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

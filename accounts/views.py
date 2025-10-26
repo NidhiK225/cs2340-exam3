@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
 
-from .forms import roadTripperignUpForm, RecruiterSignUpForm, RecommendationPriorityForm
+from .forms import roadTripperignUpForm, RecruiterSignUpForm
 from .models import User, RecruiterProfile
 from .decorators import recruiter_required
 
@@ -18,7 +18,7 @@ def role_redirect(user):
     if user.role == User.Roles.RECRUITER:
         return reverse("jobs.create")   # recruiter goes to job posting page (dashboard later)
     else:
-        return reverse("jobs.list")     # job seeker goes to job listings
+        return reverse("roadTripper.my_profile")     # job seeker goes to job listings
 
 
 # ---------- Signup Views ----------

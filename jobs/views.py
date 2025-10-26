@@ -11,7 +11,7 @@ import json
 
 # List jobs (everyone can see)
 def job_list(request):
-    qs = Job.objects.all().select_related("created_by").prefetch_related("skills")
+    qs = Job.objects.all().select_related("created_by").prefetch_related("s")
     f = JobFilter(request.GET, queryset=qs)
     selected_remote_types = [v for v in request.GET.getlist("remote_type") if v]
     applied_jobs_preprocess = []
@@ -58,9 +58,7 @@ def job_create(request):
             return redirect("jobs.dashboard")
     else:
         form = JobForm()
-    from roadTripper.models import Skill
-    all_skills = list(Skill.objects.all().order_by('name').values_list('name', flat=True))
-    return render(request, "jobs/create.html", {"form": form, "all_skills": all_skills})
+    return render(request, "jobs/create.html", {"form": form, "all_s": all_s})
 
 # Edit job (only if recruiter owns it)
 @login_required
@@ -74,9 +72,8 @@ def job_edit(request, pk):
             return redirect("jobs.dashboard")
     else:
         form = JobForm(instance=job)
-    from roadTripper.models import Skill
-    all_skills = list(Skill.objects.all().order_by('name').values_list('name', flat=True))
-    return render(request, "jobs/edit.html", {"form": form, "job": job, "all_skills": all_skills})
+    
+    return render(request, "jobs/edit.html", {"form": form, "job": job, "all_s": all_s})
 
 #Apply Job 
 @login_required
@@ -174,16 +171,16 @@ def job_recommendations_debug(request, pk):
     from django.db.models import Q, Count, IntegerField, Value
     from roadTripper.models import roadTripper
 
-    job_skill_ids = list(job.skills.values_list('id', flat=True))
+    job__ids = list(job.s.values_list('id', flat=True))
     job_min = job.salary_min
     job_max = job.salary_max
 
     # Base candidates: only non-hidden profiles for privacy (may include not-open-to-work to show reason)
-    qs = roadTripper.objects.filter(hide_profile=False).prefetch_related('skills')
-    if job_skill_ids:
-        qs = qs.annotate(skill_overlap=Count('skills', filter=Q(skills__in=job_skill_ids), distinct=True))
+    qs = roadTripper.objects.filter(hide_profile=False).prefetch_related('s')
+    if job__ids:
+        qs = qs.annotate(_overlap=Count('s', filter=Q(s__in=job__ids), distinct=True))
     else:
-        qs = qs.annotate(skill_overlap=Value(0, output_field=IntegerField()))
+        qs = qs.annotate(_overlap=Value(0, output_field=IntegerField()))
 
     data = []
 
@@ -229,7 +226,7 @@ def job_recommendations_debug(request, pk):
         # experience meets
         exp_ok = (c.years_experience or 0) >= min_exp
 
-        total_score = (getattr(c, 'skill_overlap', 0) * 100) + (10 if exp_ok else 0)
+        total_score = (getattr(c, '_overlap', 0) * 100) + (10 if exp_ok else 0)
 
         # Inclusion no longer depends on location
         included = open_ok and sal_ok
@@ -239,7 +236,7 @@ def job_recommendations_debug(request, pk):
             'open_ok': open_ok,
             'loc_ok': loc_ok,
             'sal_ok': sal_ok,
-            'skill_overlap': getattr(c, 'skill_overlap', 0),
+            '_overlap': getattr(c, '_overlap', 0),
             'exp_ok': exp_ok,
             'score': total_score,
             'included': included,
