@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+    #map {
+        height: 500px;  
+        width: 100%;
+    }
+</style>
+
+<div class="container py-4">
+  <h2 class="mb-4">Post a New Job</h2>
+
+  <form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <!-- Table-like layout: label (left) | input (right) -->
+    <div class="mt-2">
+      <!-- Title -->
+      <div class="row align-items-center mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Job Title</label></div>
+        <div class="col-sm-8 col-lg-9">{{ form.title }}{{ form.title.errors }}</div>
+      </div>
+
+      <!-- Description -->
+      <div class="row align-items-start mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Description</label></div>
+        <div class="col-sm-8 col-lg-9">{{ form.description }}{{ form.description.errors }}</div>
+      </div>
+
+      <!-- Location -->
+      <div class="row align-items-center mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Location</label></div>
+        <div class="col-sm-8 col-lg-9">{{ form.location }}{{ form.location.errors }}</div>
+      </div>
+
+      <!-- Remote Type -->
+      <div class="row align-items-center mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Remote Type</label></div>
+        <div class="col-sm-8 col-lg-9">{{ form.remote_type }}{{ form.remote_type.errors }}</div>
+      </div>
+      <!-- Address -->
+      <div class="row align-items-center mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label" for="id_address">Address</label></div>
+        <div class="col-sm-8 col-lg-9">{{ form.address }}{{ form.address.errors }}</div>
+      </div>
+
+     <!-- Hidden fields for latitude and longitude -->
+     <input type="hidden" id="lat" name="lat">
+     <input type="hidden" id="lng" name="lng">
+    
+     <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- Your map initialization script -->
+    <script>
+        function updateHiddenFields(lat, lon) {
+            document.getElementById('lat').value = lat;
+            document.getElementById('lng').value = lon;
+        }
+
+        var addressInput = document.getElementById('id_address');
+
+        var map = L.map('map').setView([37.7749, -122.4194], 10); 
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker;
+
+    
+
+      addressInput.addEventListener('change', function() {
+          var address = this.value;
+          if (!address) return;
+
+          fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address))
+              .then(response => response.json())
+              .then(data => {
+                  if (data.length > 0) {
+                      var lat = parseFloat(data[0].lat);
+                      var lon = parseFloat(data[0].lon);
+
+                      map.setView([lat, lon], 14); 
+
+                      if (marker) {
+                          marker.setLatLng([lat, lon]);
+                      } else {
+                          marker = L.marker([lat, lon]).addTo(map);
+                      }
+
+                      document.getElementById('lat').value = lat;
+                      document.getElementById('lng').value = lon;
+                  } else {
+                      alert('Address not found. Please enter a more complete address.');
+                  }
+              });
+      });
+
+      map.on('click', function(e) {
+          var lat = e.latlng.lat;
+          var lon = e.latlng.lng;
+
+          if (marker) {
+              marker.setLatLng([lat, lon]);
+          } else {
+              marker = L.marker([lat, lon]).addTo(map);
+          }
+
+          document.getElementById('lat').value = lat;
+          document.getElementById('lng').value = lon;
+
+          map.on('click', function (e) {
+          var lat = e.latlng.lat;
+          var lon = e.latlng.lng;
+
+          if (marker) marker.setLatLng([lat, lon]);
+          else marker = L.marker([lat, lon]).addTo(map);
+
+          updateHiddenFields(lat, lon);
+
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`, {
+              headers: {
+                  'Accept': 'application/json',
+                  'User-Agent': 'CS2340-Project/1.0'
+              }
+          })
+          .then(res => res.json())
+          .then(data => {
+              if (data && data.display_name) {
+                  addressInput.value = data.display_name;
+              } else {
+                  addressInput.value = 'Unknown location';
+              }
+          })
+          .catch(err => console.log('Reverse geocode error:', err));
+        });
+
+      });
+
+    
+    </script>
+
+      <!-- Min Experience -->
+      <div class="row align-items-center mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Min Experience</label></div>
+        <div class="col-sm-8 col-lg-9">{{ form.min_experience }}{{ form.min_experience.errors }}</div>
+      </div>
+
+      <!-- Salary Min -->
+      <div class="row align-items-center mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Minimum Salary</label></div>
+        <div class="col-sm-8 col-lg-9">{{ form.salary_min }}{{ form.salary_min.errors }}</div>
+      </div>
+
+      <!-- Salary Max -->
+      <div class="row align-items-center mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Maximum Salary</label></div>
+        <div class="col-sm-8 col-lg-9">{{ form.salary_max }}{{ form.salary_max.errors }}</div>
+      </div>
+
+      <!-- Visa sponsorship -->
+      <div class="row align-items-center mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Visa Sponsorship</label></div>
+        <div class="col-sm-8 col-lg-9">
+          <div class="form-check">{{ form.visa_sponsorship }}<label class="form-check-label">Available</label></div>
+          {{ form.visa_sponsorship.errors }}
+        </div>
+      </div>
+
+      <!-- Skills (searchable picker) -->
+      <div class="row align-items-start mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Required Skills</label></div>
+        <div class="col-sm-8 col-lg-9">
+          <input type="text" class="form-control mb-2" id="skillsSearch" placeholder="Search skills..." list="skillsMasterList">
+          <datalist id="skillsMasterList">
+            {% for s in all_skills %}
+              <option value="{{ s }}"></option>
+            {% endfor %}
+          </datalist>
+          <div class="d-none" id="skillsSelectWrapper">{{ form.skills }}</div>
+          {{ form.skills.errors }}
+          <div id="skillsPicker" class="border rounded p-2" style="max-height: 260px; overflow:auto;"></div>
+          <div id="skillsSelected" class="mt-2"></div>
+        </div>
+      </div>
+
+      <!-- New skills (create on-the-fly) -->
+      <div class="row align-items-center mb-3">
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Add New Skills</label></div>
+        <div class="col-sm-8 col-lg-9">{{ form.new_skills }}<div class="form-text">{{ form.new_skills.help_text }}</div>{{ form.new_skills.errors }}</div>
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <button class="btn btn-dark" type="submit">Create Job</button>
+      <a href="{% url 'jobs.list' %}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Ensure Bootstrap styles on default widgets
+  (function() {
+    const formEl = document.currentScript.closest('div.container').querySelector('form');
+    formEl.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(el => { el.classList.add('form-control'); el.classList.add('w-100'); });
+    formEl.querySelectorAll('select').forEach(el => { el.classList.add('form-select'); el.classList.add('w-100'); });
+  })();
+
+  // Build a searchable, accessible skills picker that syncs with the hidden select
+  (function() {
+    const wrapper = document.getElementById('skillsSelectWrapper');
+    const select = wrapper ? wrapper.querySelector('select') : null;
+    const list = document.getElementById('skillsPicker');
+    const search = document.getElementById('skillsSearch');
+    const chips = document.getElementById('skillsSelected');
+    if (!select || !list) return;
+
+    function render() {
+      list.innerHTML = '';
+      const term = (search.value || '').toLowerCase().trim();
+      Array.from(select.options).forEach(opt => {
+        const label = opt.text || '';
+        if (term && !label.toLowerCase().includes(term)) return;
+        const id = 'skill_' + opt.value;
+        const item = document.createElement('div');
+        item.className = 'form-check mb-1';
+        item.innerHTML = `
+          <input class="form-check-input" type="checkbox" id="${id}" value="${opt.value}" ${opt.selected ? 'checked' : ''}>
+          <label class="form-check-label" for="${id}">${label}</label>
+        `;
+        item.querySelector('input').addEventListener('change', (e) => {
+          opt.selected = e.target.checked;
+          renderChips();
+        });
+        list.appendChild(item);
+      });
+    }
+
+    function renderChips() {
+      chips.innerHTML = '';
+      Array.from(select.selectedOptions).forEach(opt => {
+        const b = document.createElement('span');
+        b.className = 'badge text-bg-light me-1 mb-1';
+        b.style.cursor = 'pointer';
+        b.textContent = opt.text;
+        b.title = 'Click to remove';
+        b.addEventListener('click', () => {
+          opt.selected = false;
+          const cb = document.getElementById('skill_' + opt.value);
+          if (cb) cb.checked = false;
+          renderChips();
+        });
+        chips.appendChild(b);
+      });
+    }
+
+    search.addEventListener('input', render);
+    render();
+    renderChips();
+  })();
+
+  // No salary slider JS needed
+</script>
+{% endblock %}

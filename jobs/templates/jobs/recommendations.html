@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h2>Candidate Recommendations for: {{ job.title }}</h2>
+  <p class="text-muted">Location: {{ job.location }} • {{ job.get_remote_type_display }}{% if job.min_experience %} • Min Exp: {{ job.min_experience }} yrs{% endif %}</p>
+
+  <div class="mb-3">
+    <a href="{% url 'jobs.edit' job.pk %}" class="btn btn-outline-secondary">Edit Job</a>
+    <a href="{% url 'jobs.dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    <a href="{% url 'jobs.recommendations_debug' job.pk %}" class="btn btn-outline-warning">Debug</a>
+    <a href="{% url 'accounts.recommendation_settings' %}" class="btn btn-outline-primary">Adjust Weights</a>
+  </div>
+
+  {% for c in candidates %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h5 class="card-title mb-1">{{ c.full_name }}</h5>
+            <div class="text-muted">{{ c.location }}{% if c.years_experience %} • {{ c.years_experience }} yrs exp{% endif %}</div>
+          </div>
+          <div class="text-end text-muted small">
+            Score: {{ c.total_score|default:0 }}
+          </div>
+        </div>
+
+        <div class="small text-secondary mt-2">
+          Matched Skills:
+          {% with job_skills=job.skills.all candidate_skills=c.skills.all %}
+            {% if job_skills and candidate_skills %}
+              {% for s in job_skills %}
+                {% if s in candidate_skills %}
+                  <span class="badge text-bg-light me-1">{{ s.name }}</span>
+                {% endif %}
+              {% endfor %}
+            {% else %}
+              <em>None</em>
+            {% endif %}
+          {% endwith %}
+        </div>
+
+        {% if c.headline %}
+          <p class="mt-2 mb-0">{{ c.headline|truncatewords:40 }}</p>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <p>No matching candidates found yet. Try adding skills or adjusting minimum experience.</p>
+  {% endfor %}
+</div>
+{% endblock %}

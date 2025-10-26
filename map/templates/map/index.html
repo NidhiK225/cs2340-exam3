@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 mb-0">Jobs Map</h2>
+    <a href="{% url 'jobs.list' %}" class="btn btn-outline-secondary btn-sm">Back to Jobs</a>
+  </div>
+
+  <style>
+    #map { height: 70vh; width: 100%; }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    (function() {
+      const jobs = {{ jobs_json|safe }};
+      const appliedIds = {{ applied_ids|safe }};
+      const isAuth = {{ user_is_authenticated|yesno:"true,false" }};
+      const isroadTripper = {{ user_is_roadTripper|yesno:"true,false" }};
+
+      const map = L.map('map');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+
+      const markers = [];
+      for (const job of jobs) {
+        const isApplied = appliedIds.includes(job.id);
+        const action = isAuth
+          ? (isroadTripper
+              ? (isApplied
+                ? '<button class="btn btn-secondary btn-sm" disabled>Pending</button>'
+                : `<button class="btn btn-success btn-sm js-apply-btn" data-job-id="${job.id}" data-title="${job.title}">Apply</button>`)
+              : '<div class="text-muted small">Log in as Job Seeker to apply</div>')
+          : '<div class="text-muted small">Log in to apply</div>';
+
+        const popup = `
+          <div>
+            <strong>${job.title}</strong><br/>
+            <span class="text-muted">${job.location} • ${job.remote_type}${job.visa ? ' • Visa Sponsorship' : ''}${(job.salary_min||job.salary_max) ? ` • $${job.salary_min||'?'}-${job.salary_max||'?'}` : ''}</span>
+            <div class="small mt-1">Skills: ${job.skills && job.skills.length ? job.skills.join(', ') : '(none)'}</div>
+            <div class="mt-2 small">${(job.description||'').slice(0, 180)}${(job.description||'').length > 180 ? '…' : ''}</div>
+            <div class="mt-2">${action}</div>
+          </div>`;
+        const m = L.marker([job.lat, job.lng]).addTo(map).bindPopup(popup);
+        markers.push(m);
+      }
+
+      if (markers.length > 0) {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.2));
+      } else {
+        map.setView([39.5, -98.35], 4); // USA fallback
+      }
+
+      // Delegate apply button clicks to open modal
+      document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.js-apply-btn');
+        if (!btn) return;
+        const jobId = btn.getAttribute('data-job-id');
+        const title = btn.getAttribute('data-title');
+        const modalEl = document.getElementById('applyModal');
+        modalEl.querySelector('.modal-title').textContent = 'Apply for ' + title;
+        const form = modalEl.querySelector('form');
+        form.setAttribute('action', `{% url 'apply_job' 0 %}`.replace('/0/', '/' + jobId + '/'));
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+      });
+    })();
+  </script>
+
+  <!-- Shared Apply Modal -->
+  {% if user_is_authenticated and user_is_roadTripper %}
+  <div class="modal fade" id="applyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Apply</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form method="POST" action="#">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="messageMap" class="form-label">Message to Employer</label>
+              <textarea class="form-control" id="messageMap" name="message" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Application</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

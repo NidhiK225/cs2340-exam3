@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<div class="p-3">
+  <div class="container">
+    <div class="row mt-3">
+      <div class="col mx-auto mb-3">
+        <h2>List of Job Seekers</h2>
+        <hr />
+        <form method="GET">
+          <div class="row g-2">
+            <div class="col-md-3">
+              <input type="text" class="form-control" name="name"
+                    placeholder="Search by name or headline"
+                    value="{{ request.GET.name }}">
+            </div>
+            <div class="col-md-3">
+              <input type="text" class="form-control" name="location"
+                    placeholder="Search by location"
+                    value="{{ request.GET.location }}">
+            </div>
+            <div class="col-md-3">
+              <input type="text" class="form-control" name="skill" list="skillsList"
+                    placeholder="Search by skill"
+                    value="{{ request.GET.skill }}">
+              <datalist id="skillsList">
+                {% for s in template_data.all_skills %}
+                  <option value="{{ s }}"></option>
+                {% endfor %}
+              </datalist>
+            </div>
+            <div class="col-md-3">
+              <input type="text" class="form-control" name="experience"
+                    placeholder="Search by experience"
+                    value="{{ request.GET.experience }}">
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-auto">
+              <button class="btn bg-dark text-white" type="submit">Search</button>
+              <a href="{% url 'roadTripper.index' %}" class="btn btn-secondary">Clear</a>
+              <button
+                class="btn btn-link text-primary"
+                type="submit"
+                formaction="{% url 'roadTripper.save_candidate_search' %}"
+                formmethod="get">
+                Save Candidate Search
+              </button>   
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="row g-3 align-items-start">
+      <div class="col-md-4 col-12 mb-3 d-flex">
+        <div class="card p-3 border-0 shadow h-100 w-100">
+          <div class="d-flex align-items-center">
+            <div>
+              <div class="fw-semibold lh-sm fs-5">Candidate Searches</div>
+              <div class="text-muted small">Save filters and revisit matches later</div>
+            </div>
+            <a href="{% url 'roadTripper.refresh_candidate_searches' %}" class="btn btn-link text-secondary ms-auto">Refresh</a>
+          </div>
+
+          <ul class="list-group list-group-flush mt-2">
+            {% for candidateSearch in template_data.candidateSearches %}
+              <li class="list-group-item border-0 shadow-sm rounded mb-3">
+                <div class="d-flex align-items-start">
+                  <div class="flex-grow-1">
+                    <div class="small text-muted">Saved {{ candidateSearch.date }}</div>
+                    <div class="mt-1">
+                      {% if candidateSearch.nameHeadline %}
+                        <span class="badge text-bg-light me-1 mb-1">Name/Headline: {{ candidateSearch.nameHeadline }}</span>
+                      {% endif %}
+                      {% if candidateSearch.location %}
+                        <span class="badge text-bg-light me-1 mb-1">Location: {{ candidateSearch.location }}</span>
+                      {% endif %}
+                      {% if candidateSearch.skill %}
+                        <span class="badge text-bg-light me-1 mb-1">Skill: {{ candidateSearch.skill }}</span>
+                      {% endif %}
+                      {% if candidateSearch.experience %}
+                        <span class="badge text-bg-light me-1 mb-1">Experience: {{ candidateSearch.experience }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="text-end ms-2">
+                    <span class="badge rounded-pill text-bg-secondary">{{ candidateSearch.matches_count }} matches</span>
+                  </div>
+                </div>
+                <div class="d-flex gap-2 mt-2">
+                  {% if candidateSearch.is_current %}
+                    <button class="btn btn-outline-success" disabled>Applied</button>
+                  {% else %}
+                    <a href="{% url 'roadTripper.apply_candidate_search' id=candidateSearch.id %}" class="btn btn-primary">Apply</a>
+                  {% endif %}
+                  <a href="{% url 'roadTripper.delete_candidate_search' id=candidateSearch.id %}" class="btn btn-outline-secondary">Delete</a>
+                </div>
+              </li>
+            {% empty %}
+              <li class="list-group-item border-0 text-muted">No saved searches.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-md-8 col-12 mb-3">
+        {% for roadTripper in template_data.roadTripper %}
+          <div class="card p-3 border-0 shadow mb-3">
+            <div class="d-flex align-items-center gap-3 flex-nowrap w-100">
+              
+              <div class="flex-shrink-0">
+                {% if not roadTripper.hide_image and roadTripper.image %}
+                  <img class="flex-shrink-0" src="{{ roadTripper.image.url }}" alt="{{ roadTripper.full_name }}"
+                      width="128" height="128" 
+                      style="width:128px;height:128px;border-radius:50%;object-fit:cover;object-position:center;display:block;"
+                      loading="lazy">
+                {% else %}
+                  <img class="flex-shrink-0" src="{% static 'img/default_profile.jpg' %}" alt="No profile image"
+                      width="128" height="128"
+                      style="width:128px;height:128px;border-radius:50%;object-fit:cover;object-position:center;display:block;"
+                      loading="lazy">
+                {% endif %}
+              </div>
+
+              <div class="flex-grow-1 min-w-0 overflow-hidden">
+                <div class="mt-2">
+                <div class="fw-semibold lh-sm fs-4 text-truncate">
+                  <span class="d-block text-truncate">{{ roadTripper.firstName }} {{ roadTripper.lastName }}</span>
+                </div>
+                <div class="text-body-secondary my-1 lh-sm mb-2">
+                  <span class="d-block text-truncate">{{ roadTripper.degree }}</span>
+                </div>
+                {% if not roadTripper.hide_headline %}     
+                  <div class="text-muted small my-1 lh-sm">
+                    <span class="d-block text-truncate">{{ roadTripper.headline|truncatewords:12 }}</span>
+                  </div>
+                {% endif %}
+                </div>
+              </div>
+              <div class="ms-auto text-nowrap flex-shrink-0 align-self-center">
+                <a href="{% url 'roadTripper.show' id=roadTripper.id %}" class="btn btn-primary">
+                  Visit Profile
+                </a>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+       <p>No job seekers found.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h2>Recommendations Debug: {{ job.title }}</h2>
+  <p class="text-muted">Explains why candidates are included or excluded.</p>
+
+  <div class="mb-3">
+    <a href="{% url 'jobs.recommendations' job.pk %}" class="btn btn-outline-secondary">Back to Recommendations</a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>Candidate</th>
+          <th>Open</th>
+          <th>Location OK</th>
+          <th>Salary OK</th>
+          <th>Skill Overlap</th>
+          <th>Exp Meets</th>
+          <th>Score</th>
+          <th>Included</th>
+          <th>Reasons</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr class="{% if not row.included %}table-warning{% endif %}">
+            <td>{{ row.candidate.full_name }}</td>
+            <td>{% if row.open_ok %}✔{% else %}✖{% endif %}</td>
+            <td>{% if row.loc_ok %}✔{% else %}✖{% endif %}</td>
+            <td>{% if row.sal_ok %}✔{% else %}✖{% endif %}</td>
+            <td>{{ row.skill_overlap }}</td>
+            <td>{% if row.exp_ok %}✔{% else %}✖{% endif %}</td>
+            <td>{{ row.score }}</td>
+            <td>{% if row.included %}Yes{% else %}No{% endif %}</td>
+            <td>
+              {% if row.reasons %}
+                {% for r in row.reasons %}
+                  <span class="badge text-bg-light me-1">{{ r }}</span>
+                {% endfor %}
+              {% else %}
+                <em>—</em>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="9"><em>No candidates found.</em></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

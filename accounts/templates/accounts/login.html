@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+      <div class="card shadow border-0">
+        <div class="card-body p-4">
+          <h3 class="mb-1">Welcome back</h3>
+          <p class="text-muted mb-4">Sign in to continue</p>
+          
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {% for field in form %}
+              <div class="row align-items-center mb-3">
+                <div class="col-sm-4 text-muted">
+                  <label class="col-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                </div>
+                <div class="col-sm-8">
+                  {{ field }}
+                  {% for error in field.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+
+            <button class="btn btn-primary w-100" type="submit">Login</button>
+          </form>
+
+          <div class="text-center mt-3">
+            <span class="text-muted">Don’t have an account?</span>
+            <a href="{% url 'signup.choice' %}">Sign up</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const root = document.currentScript.closest('.container');
+    if (!root) return;
+    root.querySelectorAll('input, select, textarea').forEach(el => {
+      const isSelect = el.tagName.toLowerCase() === 'select';
+      if (!el.classList.contains('form-control') && !el.classList.contains('form-select')) {
+        el.classList.add(isSelect ? 'form-select' : 'form-control');
+      }
+    });
+  })();
+</script>
+{% endblock %}

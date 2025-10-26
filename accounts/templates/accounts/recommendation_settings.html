@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h2>Recommendation Settings</h2>
+  <p class="text-muted">Pick Low / Medium / High priorities. These control how much each category influences ranking.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="mb-3">
+      <label class="form-label">Skill priority</label>
+      {{ form.skill_priority }}
+      <div class="form-text">{{ form.fields.skill_priority.help_text }}</div>
+      {{ form.skill_priority.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Experience priority</label>
+      {{ form.experience_priority }}
+      <div class="form-text">{{ form.fields.experience_priority.help_text }}</div>
+      {{ form.experience_priority.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Location priority</label>
+      {{ form.location_priority }}
+      <div class="form-text">{{ form.fields.location_priority.help_text }}</div>
+      {{ form.location_priority.errors }}
+    </div>
+
+    <button class="btn btn-dark" type="submit">Save</button>
+    <a href="{% url 'jobs.dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

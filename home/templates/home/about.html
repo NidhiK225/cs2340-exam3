@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<div class="p-3">
+  <div class="container">
+    <div class="row mt-3">
+      <div class="col-md-6 mx-auto mb-3">
+        <h2>About Job Viewer</h2>
+        <hr />
+        <p>
+          Job Viewer connects recruiters and job seekers with a modern, fast,
+          and transparent experience. Recruiters can post roles, manage applicants,
+          and collaborate on hiring. Job seekers can build profiles, showcase skills,
+          and apply with confidence.
+        </p>
+        <p>
+          We focus on clarity and accessibility: streamlined filters, clean UI,
+          and responsive design across devices. Whether you’re hiring or searching,
+          Job Viewer helps you find the right match quickly.
+        </p>
+      </div>
+      <div class="col-md-6 mx-auto mb-3 text-center">
+        <img src="{% static 'img/about.jpg' %}"
+             class="max-width-100"
+             alt="about" />
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

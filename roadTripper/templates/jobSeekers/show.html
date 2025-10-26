@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<div class="p-3">
+  <div class="container">
+    <div class="col-md-6 mx-auto mb-3">
+
+      <div class="mb-3 text-center">
+
+        {% load static %}
+        {% if template_data.roadTripper.image and not template_data.roadTripper.hide_image %}
+          <img src="{{ template_data.roadTripper.image.url }}" class="d-block mx-auto" style="width:300px;height:300px;border-radius:50%;object-fit:cover;object-position:center;" alt="{{ template_data.name }}">
+        {% else %}
+          <img src="{% static 'img/default_profile.jpg' %}" class="avatar-big d-block mx-auto" alt="No profile image">
+        {% endif %}
+
+
+        {% if user.is_authenticated and user.is_roadTripper and template_data.roadTripper.user_id == user.id %}
+        <div class="mt-3">
+            <a href="{% url 'roadTripper.edit_profile' %}" class="btn btn-outline-primary">Edit Profile</a>
+        </div>
+        {% endif %}
+
+      </div>
+
+      <h2>{{ template_data.name }}</h2>
+      {% if not template_data.roadTripper.hide_location %}
+        <p>{{ template_data.roadTripper.location }}</p>
+      {% endif %}
+
+      {% if not template_data.roadTripper.hide_headline %}
+      <div class="mt-3">{{ template_data.roadTripper.headline }}</div>
+      {% endif %}
+
+      <h4 class="mt-5">Education</h4>
+      <hr />
+
+      {% if template_data.roadTripper.education.name %}
+        <div class="fw-light">
+          {{ template_data.roadTripper.education.name }} | {{ template_data.roadTripper.education.location }}
+        </div>
+        <div class="text-body-secondary">
+          {% if template_data.roadTripper.endYear == None %}
+            Since {{ template_data.roadTripper.startYear }}
+          {% else %}
+            {{ template_data.roadTripper.startYear }} - {{ template_data.roadTripper.endYear }}
+          {% endif %}
+        </div>
+      {% else %}
+        No education listed.
+      {% endif %}
+
+      <h4 class="mt-5">Work Experience</h4>
+      <hr />
+
+      {% for experience in template_data.experiences %}
+        <div class="col-md-8 col-12 mb-5">
+          <div class="fw-semibold lh-sm fs-5 text-truncate" style="max-width: 500px;">
+            {{ experience.name }} | {% if not template_data.roadTripper.hide_location %} {{ experience.location }} {% endif %}
+          </div>
+          <div class="text-body-secondary my-1 lh-sm mb-3">
+            {% if experience.endDate == "" %}
+              Since {{ experience.startDate }}
+            {% else %}
+              {{ experience.startDate }} - {{ experience.endDate }}
+            {% endif %}
+          </div>
+          <div class="my-1 lh-sm mb-3">
+            {{ experience.description }}
+          </div>
+        </div>
+      {% empty %}
+        <p>No experiences listed.</p>
+      {% endfor %}
+
+      <h4 class="mt-5">Skills</h4>
+      <hr />
+      {% for skill in template_data.skills %}
+        <div class="col-md-8 col-12 mb-2">
+          <span class="badge bg-secondary">{{ skill.name }}</span>
+        </div>
+      {% empty %}
+        <p>No skills listed.</p>
+      {% endfor %}
+
+      <h4 class="mt-5">Links</h4>
+      <hr />
+      {% for link in template_data.links %}
+        <div class="col-md-8 col-12 mb-2">
+          <a href="{{ link.url }}" target="_blank">{{ link.url }}</a>
+        </div>
+      {% empty %}
+        <p>No links provided.</p>
+      {% endfor %}
+
+      <h4 class="mt-5">Recommended Jobs</h4>
+      <hr />
+      {% if template_data.recommended_jobs %}
+<div class="card p-3 border-0 shadow mt-4">
+    {% for job in template_data.recommended_jobs %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h5 class="card-title">{{ job.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ job.company_name }}</h6>
+                </div>
+            </div>
+            <p class="card-text mt-2">{{ job.description|truncatewords:30 }}</p>
+            {% if job.matching_skills_names %}
+            <div class="mt-2">
+                <small class="text-muted">Matching Skills:</small>
+                {% for skill_name in job.matching_skills_names %}
+                    <span class="badge bg-success">{{ skill_name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            </div>
+            </div>
+            {%endfor%}
+            </div>
+            {% else %}
+            {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

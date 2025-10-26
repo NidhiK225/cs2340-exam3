@@ -1,0 +1,256 @@
+/*
+  Global Theme Tokens + Component Polish (Bootstrap 5 override)
+  - Light/Dark via CSS variables
+  - Cleaner selects, dropdowns, forms
+  - Minimal, focused overrides to keep Bootstrap behavior
+*/
+
+/* Theme tokens */
+:root {
+  --bg: #ffffff;
+  --bg-alt: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f2f3f5;
+  --text: #1b1f23;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+
+  /* Brand palette */
+  --brand-blue-1: #99C3EC;   /* primary */
+  --brand-blue-2: #AAD2EC;
+  --brand-cyan:   #BCECE6;
+  --brand-mint:   #97E3C2;
+  --brand-peach:  #FFEED9;
+  --brand-pink:   #F69C9E;
+
+  --primary: var(--brand-blue-1);
+  --primary-contrast: #0b0d10;
+  --link: var(--brand-blue-1);
+  --success: var(--brand-mint);
+  --warning: var(--brand-peach);
+  --danger: var(--brand-pink);
+
+  --shadow: 0 6px 20px rgba(0,0,0,0.08);
+  --radius: 10px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+  --focus: 0 0 0 0.2rem rgba(153,195,236,0.35); /* based on brand-blue-1 */
+  --transition: 180ms ease;
+}
+
+/* Dark theme overrides */
+body.theme-dark {
+  --bg: #0b0d10;
+  --bg-alt: #0f1216;
+  --surface: #12161b;
+  --surface-2: #0f1318;
+  --text: #e5e7eb;
+  --muted: #9aa3af;
+  --border: #1f2937;
+
+  --primary: #AAD2EC;          /* softer blue for dark */
+  --primary-contrast: #0b0d10;
+  --link: #AAD2EC;
+  --success: #97E3C2;
+  --warning: #FFEED9;
+  --danger: #F69C9E;
+
+  --shadow: 0 8px 30px rgba(0,0,0,0.45);
+}
+
+/* Base layout */
+html, body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+a { color: var(--link); }
+a:hover { opacity: 0.9; }
+
+/* Hero / index background */
+.bg-index{
+  background: url("/static/img/background.jpg") no-repeat fixed;
+  background-size: cover;
+}
+
+/* Navbar */
+.navbar {
+  backdrop-filter: saturate(160%) blur(4px);
+}
+.navbar .nav-link { opacity: 0.9; }
+.navbar .nav-link:hover { opacity: 1; }
+
+/* Brand header bar */
+.ms-brandbar {
+  background-color: #99C3EC; /* fallback */
+  background: linear-gradient(90deg, var(--brand-blue-1), var(--brand-cyan)) !important;
+  border-bottom: 2px solid rgba(0,0,0,0.06);
+}
+.ms-brandbar .nav-link,
+.ms-brandbar .navbar-brand,
+.ms-brandbar .navbar-text { color: var(--primary-contrast) !important; }
+.ms-brandbar .nav-link:hover { opacity: 0.9; }
+.ms-brandbar .nav-link { position: relative; transition: color 160ms ease, transform 140ms ease; }
+.ms-brandbar .nav-link::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: -4px;
+  height: 2px; width: 0; margin: 0 auto;
+  background: var(--primary-contrast);
+  transition: width 180ms ease;
+}
+.ms-brandbar .nav-link:hover { transform: translateY(-1px); }
+.ms-brandbar .nav-link:hover::after { width: 100%; }
+.ms-brandbar .btn-outline-light,
+.ms-brandbar .btn-outline-dark {
+  color: var(--primary-contrast);
+  border-color: rgba(0,0,0,0.15);
+}
+
+/* Cards */
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* Buttons */
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-contrast);
+}
+.btn-primary:hover { filter: brightness(0.95); }
+.btn-outline-secondary { color: var(--text); border-color: var(--border); }
+.btn-outline-secondary:hover { background: var(--surface-2); }
+.btn-dark { background: #111827; border-color: #111827; }
+
+/* Subtle button animations */
+.btn {
+  transition: transform 140ms ease, box-shadow 180ms ease, filter 140ms ease;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn:active { transform: translateY(0); filter: brightness(0.96); box-shadow: none; }
+
+/* Forms */
+.form-control,
+.form-select,
+.form-check-input {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-xs);
+}
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  box-shadow: var(--focus);
+  border-color: var(--primary);
+}
+
+/* Cleaner selects */
+.form-select {
+  padding-right: 2.25rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+                    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 1.1rem) 1.05rem, calc(100% - 0.75rem) 1.05rem;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  min-height: 40px;
+}
+.form-select[multiple] {
+  background-image: none; /* preserve native affordance */
+  min-height: 120px;
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 0.5rem;
+}
+.dropdown-item {
+  border-radius: var(--radius-xs);
+}
+.dropdown-item:hover, .dropdown-item:focus {
+  background: var(--surface-2);
+}
+.dropdown-divider { border-top-color: var(--border); }
+
+/* Footer */
+.ms-footer {
+  background-color: #99C3EC; /* fallback */
+  background: linear-gradient(90deg, var(--brand-blue-1), var(--brand-cyan)) !important;
+  border-top: 2px solid rgba(0,0,0,0.06);
+}
+.ms-footer p { color: var(--primary-contrast); font-size: 13px; }
+.ms-footer a { color: var(--primary-contrast); }
+.ms-footer a:hover { opacity: 0.9; text-decoration: none; }
+.ms-footer-bottom { background-color: #99C3EC; background: linear-gradient(90deg, var(--brand-blue-1), var(--brand-cyan)) !important; border-top: 0; }
+.ms-footer-bottom span{ font-size: 13px; line-height: 38px; }
+.ms-footer-bottom a { color: var(--primary-contrast); text-decoration: none; }
+.ms-footer-bottom a:hover { opacity: 0.9; }
+
+/* Home: make entire page a single animated blue gradient */
+body.is-home {
+  /* Fallback solid color for very old browsers */
+  background: #99C3EC;
+  /* Larger, multi-color animated gradient for home */
+  background: linear-gradient(-45deg,
+    var(--brand-blue-1), var(--brand-blue-2), var(--brand-cyan), var(--brand-mint), var(--brand-peach), var(--brand-pink), var(--brand-blue-2));
+  background-size: 600% 600%;
+  animation: msGradientMove 28s ease infinite;
+  /* Force high-contrast text on colorful gradient */
+  color: #ffffff;
+}
+.is-home a, .is-home .navbar .nav-link, .is-home .navbar .navbar-brand, .is-home .ms-footer-bottom span { color: #ffffff !important; }
+.is-home .btn-outline-primary { color: #ffffff; border-color: rgba(255,255,255,0.7); }
+.is-home .btn-outline-primary:hover { background: rgba(255,255,255,0.1); }
+.is-home a { color: var(--primary-contrast); }
+.is-home a:hover { opacity: 0.9; }
+
+/* Make header/footer transparent on home so gradient is continuous */
+.is-home .ms-brandbar,
+.is-home .ms-footer,
+.is-home .ms-footer-bottom {
+  background: transparent !important;
+  border: 0 !important;
+}
+.is-home .navbar { backdrop-filter: none; }
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  body.is-home { animation: none; }
+}
+.is-home .home-hero { min-height: calc(100vh - 0px); }
+
+@keyframes msGradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Imagery */
+.img-card-200 {
+  width: 200px;
+  max-height: 300px;
+  object-fit: cover; /* crop & fill */
+}
+
+/* Subtle transitions for interactive elements */
+.btn, .form-control, .form-select, .nav-link, .card { transition: all var(--transition); }
+
+/* Toasts (messages) alignment with theme */
+.toast { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.toast .btn-close { filter: invert(0.5); }
