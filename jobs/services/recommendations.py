@@ -7,17 +7,17 @@ def recommend_candidates_for_job(job, limit=50):
     """
     Return a queryset of roadTripper ranked for a given job.
     Scoring is simple and SQLite-friendly:
-      - skill_overlap (count of shared skills) weighted heavily
+      - _overlap (count of shared s) weighted heavily
       - experience match gives a small boost
     Only returns public profiles who are open_to_work.
     """
-    job_skill_ids = list(job.skills.values_list('id', flat=True))
+    job__ids = list(job.s.values_list('id', flat=True))
     min_exp = job.min_experience or 0
 
     qs = roadTripper.objects.filter(
         hide_profile=False,
         open_to_work=True,
-    ).prefetch_related('skills', 'experience')
+    ).prefetch_related('s', 'experience')
 
     # Location is a soft signal now (lower priority): never excludes candidates.
     # Compute a small location bonus via annotation instead of filtering.
@@ -37,12 +37,12 @@ def recommend_candidates_for_job(job, limit=50):
             salary_q &= (Q(desired_salary_max__gte=job_min) | Q(desired_salary_max__isnull=True))
         qs = qs.filter(salary_q)
 
-    if job_skill_ids:
+    if job__ids:
         qs = qs.annotate(
-            skill_overlap=Count('skills', filter=Q(skills__in=job_skill_ids), distinct=True)
+            _overlap=Count('s', filter=Q(s__in=job__ids), distinct=True)
         )
     else:
-        qs = qs.annotate(skill_overlap=Value(0, output_field=IntegerField()))
+        qs = qs.annotate(_overlap=Value(0, output_field=IntegerField()))
 
     qs = qs.annotate(
         exp_meets=Case(
@@ -74,22 +74,22 @@ def recommend_candidates_for_job(job, limit=50):
             'HIGH': 1.5,
         }
         # Bases reflect current defaults
-        base_skill, base_exp, base_loc = 100, 10, 5
+        base_, base_exp, base_loc = 100, 10, 5
 
-        w_skill = int(base_skill * mult.get(getattr(profile, 'skill_priority', 'MEDIUM') or 'MEDIUM', 1.0))
+        w_ = int(base_ * mult.get(getattr(profile, '_priority', 'MEDIUM') or 'MEDIUM', 1.0))
         w_exp = int(base_exp * mult.get(getattr(profile, 'experience_priority', 'MEDIUM') or 'MEDIUM', 1.0))
         w_loc = int(base_loc * mult.get(getattr(profile, 'location_priority', 'MEDIUM') or 'MEDIUM', 1.0))
     except Exception:
         # Fallback when profile missing or DB lacks new columns (pre-migration)
-        w_skill, w_exp, w_loc = 100, 10, 5
+        w_, w_exp, w_loc = 100, 10, 5
 
     qs = qs.annotate(
         total_score=ExpressionWrapper(
-            F('skill_overlap') * Value(w_skill) +
+            F('_overlap') * Value(w_) +
             F('exp_meets') * Value(w_exp) +
             F('loc_match') * Value(w_loc),
             output_field=IntegerField()
         )
     )
 
-    return qs.order_by('-total_score', '-skill_overlap', '-years_experience')[:limit]
+    return qs.order_by('-total_score', '-_overlap', '-years_experience')[:limit]

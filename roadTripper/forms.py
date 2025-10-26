@@ -1,41 +1,38 @@
 from django import forms
-from .models import roadTripper, Skill
+from .models import roadTripper
 
 class RoadTripperForm(forms.ModelForm):
     class Meta:
         model = roadTripper
         fields = [
+            "image",
             "firstName",
             "lastName",
             "location",
-            "image",
-            "years_experience",
-            "open_to_work",
-            "desired_salary_min",
-            "desired_salary_max",
-            "education",
-            "degree",
-            "startYear",
-            "endYear",
-            "headline",
-            "hide_location",
+            "travel_headline",
+            "travel_budget",
+            "interests",
+            "destinations",
             "hide_profile",
             "hide_image",
-            "hide_headline"
+            "hide_travel_headline",
+            "hide_location",
+            "hide_travel_budget",
         ]
         widgets = {
-            "headline": forms.Textarea(attrs={"rows": 3}),
-            'open_to_work': forms.CheckboxInput(),
             'hide_location': forms.CheckboxInput(),
             'hide_image': forms.CheckboxInput(),
-            'hide_headline': forms.CheckboxInput(),
-            'hide_profile': forms.CheckboxInput()
+            'hide_travel_headline': forms.CheckboxInput(),
+            'hide_profile': forms.CheckboxInput(),
+            "hide_travel_budget": forms.CheckboxInput()
+
         }
 
         labels = {
             'hide_image': "Keep your image private",
-            'hide_headline': "Keep your headline private",
+            'hide_travel_headline': "Keep your headline private",
             'hide_profile': "Keep profile hidden",
             'hide_location': "Hide your location",
+            "hide_travel_budget": "Hide budget"
         }
 

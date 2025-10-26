@@ -166,32 +166,32 @@
       {{ form.visa_sponsorship.errors }}
     </div>
 
-    <!-- Skills -->
+    <!-- s -->
     <div class="mb-3">
-      <label class="form-label">Required Skills</label>
-      <input type="text" class="form-control mb-2" id="skillsSearchEdit" placeholder="Search skills..." list="skillsMasterList">
-      <datalist id="skillsMasterList">
-        {% for s in all_skills %}
+      <label class="form-label">Required s</label>
+      <input type="text" class="form-control mb-2" id="sSearchEdit" placeholder="Search s..." list="sMasterList">
+      <datalist id="sMasterList">
+        {% for s in all_s %}
           <option value="{{ s }}"></option>
         {% endfor %}
       </datalist>
-      <div class="d-none" id="skillsSelectWrapperEdit">{{ form.skills }}</div>
-      {{ form.skills.errors }}
-      <div id="skillsPickerEdit" class="border rounded p-2" style="max-height: 260px; overflow:auto;"></div>
-      <div id="skillsSelectedEdit" class="mt-2"></div>
+      <div class="d-none" id="sSelectWrapperEdit">{{ form.s }}</div>
+      {{ form.s.errors }}
+      <div id="sPickerEdit" class="border rounded p-2" style="max-height: 260px; overflow:auto;"></div>
+      <div id="sSelectedEdit" class="mt-2"></div>
     </div>
     <button class="btn btn-dark" type="submit">Save Changes</button>
     <a href="{% url 'jobs.list' %}" class="btn btn-outline-secondary">Cancel</a>
   </form>
 
 <script>
-// Build a searchable skills picker for edit page
+// Build a searchable s picker for edit page
 (function() {
-  const wrapper = document.getElementById('skillsSelectWrapperEdit');
+  const wrapper = document.getElementById('sSelectWrapperEdit');
   const select = wrapper ? wrapper.querySelector('select') : null;
-  const list = document.getElementById('skillsPickerEdit');
-  const search = document.getElementById('skillsSearchEdit');
-  const chips = document.getElementById('skillsSelectedEdit');
+  const list = document.getElementById('sPickerEdit');
+  const search = document.getElementById('sSearchEdit');
+  const chips = document.getElementById('sSelectedEdit');
   if (!select || !list) return;
 
   function render() {
@@ -200,7 +200,7 @@
     Array.from(select.options).forEach(opt => {
       const label = opt.text || '';
       if (term && !label.toLowerCase().includes(term)) return;
-      const id = 'skill_edit_' + opt.value;
+      const id = '_edit_' + opt.value;
       const item = document.createElement('div');
       item.className = 'form-check mb-1';
       item.innerHTML = `
@@ -225,7 +225,7 @@
       b.title = 'Click to remove';
       b.addEventListener('click', () => {
         opt.selected = false;
-        const cb = document.getElementById('skill_edit_' + opt.value);
+        const cb = document.getElementById('_edit_' + opt.value);
         if (cb) cb.checked = false;
         renderChips();
       });

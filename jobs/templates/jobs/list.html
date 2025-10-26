@@ -95,8 +95,8 @@
         </div>
 
         <div class="small text-secondary mb-2">
-          Skills:
-          {% for s in job.skills.all %}
+          s:
+          {% for s in job.s.all %}
             <span class="badge text-bg-light me-1">{{ s.name }}</span>
           {% empty %}
             <em>None</em>

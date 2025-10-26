@@ -5,7 +5,7 @@ import json
 
 
 def index(request):
-    qs = Job.objects.all().prefetch_related("skills")
+    qs = Job.objects.all().prefetch_related("s")
 
     jobs_with_coords = []
     for job in qs:
@@ -33,7 +33,7 @@ def index(request):
             "visa": job.visa_sponsorship,
             "salary_min": job.salary_min,
             "salary_max": job.salary_max,
-            "skills": [s.name for s in job.skills.all()],
+            "s": [s.name for s in job.s.all()],
             "description": job.description,
             "lat": job.lat,
             "lng": job.lng,

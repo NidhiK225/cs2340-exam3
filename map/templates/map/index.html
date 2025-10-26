@@ -38,7 +38,7 @@
           <div>
             <strong>${job.title}</strong><br/>
             <span class="text-muted">${job.location} • ${job.remote_type}${job.visa ? ' • Visa Sponsorship' : ''}${(job.salary_min||job.salary_max) ? ` • $${job.salary_min||'?'}-${job.salary_max||'?'}` : ''}</span>
-            <div class="small mt-1">Skills: ${job.skills && job.skills.length ? job.skills.join(', ') : '(none)'}</div>
+            <div class="small mt-1">s: ${job.s && job.s.length ? job.s.join(', ') : '(none)'}</div>
             <div class="mt-2 small">${(job.description||'').slice(0, 180)}${(job.description||'').length > 180 ? '…' : ''}</div>
             <div class="mt-2">${action}</div>
           </div>`;
