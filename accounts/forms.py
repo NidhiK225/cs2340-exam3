@@ -33,7 +33,7 @@ class PlannerSignUpForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.role = User.Roles.RECRUITER
-        user.is_recruiter = True
+        # user.is_recruiter = True
         if commit:
             user.save()
             PlannerProfile.objects.create(user=user)

@@ -16,7 +16,7 @@ from .decorators import recruiter_required
 def role_redirect(user):
     """Redirect users after login/signup based on their role."""
     if user.role == User.Roles.RECRUITER:
-        return reverse("trip.create")   # recruiter goes to job posting page (dashboard later)
+        return reverse("trip_dashboard")
     else:
         return reverse("roadTripper.my_profile")     # job seeker goes to job listings
 
