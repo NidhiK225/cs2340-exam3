@@ -7,8 +7,8 @@ from django.urls import reverse
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
 
-from .forms import roadTripperignUpForm, RecruiterSignUpForm
-from .models import User, RecruiterProfile
+from .forms import roadTripperignUpForm, PlannerSignUpForm
+from .models import User, PlannerProfile
 from .decorators import recruiter_required
 
 
@@ -16,7 +16,7 @@ from .decorators import recruiter_required
 def role_redirect(user):
     """Redirect users after login/signup based on their role."""
     if user.role == User.Roles.RECRUITER:
-        return reverse("jobs.create")   # recruiter goes to job posting page (dashboard later)
+        return reverse("trip.create")   # recruiter goes to job posting page (dashboard later)
     else:
         return reverse("roadTripper.my_profile")     # job seeker goes to job listings
 
@@ -40,16 +40,18 @@ def roadTripper_signup(request):
     return render(request, "accounts/signup.html", {"form": form, "role": "Job Seeker"})
 
 
-def recruiter_signup(request):
+def planner_signup(request):
     """Sign up flow for recruiters."""
     if request.method == "POST":
-        form = RecruiterSignUpForm(request.POST)
+        form = PlannerSignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
+            print("user created and is active")
             login(request, user)
+            print("user is logged in")
             return redirect(role_redirect(user))
     else:
-        form = RecruiterSignUpForm()
+        form = PlannerSignUpForm()
     return render(request, "accounts/signup.html", {"form": form, "role": "Recruiter"})
 
 
@@ -70,19 +72,19 @@ def logout_view(request):
 
 
 # ---------- Recruiter Settings ----------
-@login_required
-@recruiter_required
-def recommendation_settings(request):
-    profile, _ = RecruiterProfile.objects.get_or_create(user=request.user, defaults={
-        "company_name": getattr(request.user, "username", "")
-    })
+# @login_required
+# @recruiter_required
+# def recommendation_settings(request):
+#     profile, _ = RecruiterProfile.objects.get_or_create(user=request.user, defaults={
+#         "company_name": getattr(request.user, "username", "")
+#     })
 
-    if request.method == "POST":
-        form = RecommendationPriorityForm(request.POST, instance=profile)
-        if form.is_valid():
-            form.save()
-            return redirect("jobs.dashboard")
-    else:
-        form = RecommendationPriorityForm(instance=profile)
+#     if request.method == "POST":
+#         form = RecommendationPriorityForm(request.POST, instance=profile)
+#         if form.is_valid():
+#             form.save()
+#             return redirect("jobs.dashboard")
+#     else:
+#         form = RecommendationPriorityForm(instance=profile)
 
-    return render(request, "accounts/recommendation_settings.html", {"form": form})
+#     return render(request, "accounts/recommendation_settings.html", {"form": form})

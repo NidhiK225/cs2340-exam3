@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
 from roadTripper.models import roadTripper
-from .models import RecruiterProfile
+from .models import PlannerProfile
 
 class roadTripperignUpForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True)
@@ -23,8 +23,8 @@ class roadTripperignUpForm(UserCreationForm):
         return user
 
 
-class RecruiterSignUpForm(UserCreationForm):
-    company_name = forms.CharField(max_length=255, required=True)
+class PlannerSignUpForm(UserCreationForm):
+    #company_name = forms.CharField(max_length=255, required=True)
 
     class Meta(UserCreationForm.Meta):
         model = User
@@ -35,5 +35,5 @@ class RecruiterSignUpForm(UserCreationForm):
         user.role = User.Roles.RECRUITER
         if commit:
             user.save()
-            RecruiterProfile.objects.create(user=user, company_name=self.cleaned_data["company_name"])
+            PlannerProfile.objects.create(user=user)
         return user

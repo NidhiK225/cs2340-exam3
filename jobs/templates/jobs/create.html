@@ -5,13 +5,13 @@
 
 <style>
     #map {
-        height: 500px;  
+        height: 500px;
         width: 100%;
     }
 </style>
 
 <div class="container py-4">
-  <h2 class="mb-4">Post a New Job</h2>
+  <h2 class="mb-4">Post a New Trip</h2>
 
   <form method="post" class="needs-validation" novalidate>
     {% csrf_token %}
@@ -21,7 +21,7 @@
     <div class="mt-2">
       <!-- Title -->
       <div class="row align-items-center mb-3">
-        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Job Title</label></div>
+        <div class="col-sm-4 col-lg-3 text-muted"><label class="col-form-label">Trip Title</label></div>
         <div class="col-sm-8 col-lg-9">{{ form.title }}{{ form.title.errors }}</div>
       </div>
 
@@ -51,7 +51,7 @@
      <!-- Hidden fields for latitude and longitude -->
      <input type="hidden" id="lat" name="lat">
      <input type="hidden" id="lng" name="lng">
-    
+
      <div id="map"></div>
 
     <!-- Leaflet JS -->
@@ -66,7 +66,7 @@
 
         var addressInput = document.getElementById('id_address');
 
-        var map = L.map('map').setView([37.7749, -122.4194], 10); 
+        var map = L.map('map').setView([37.7749, -122.4194], 10);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
@@ -74,7 +74,7 @@
 
         var marker;
 
-    
+
 
       addressInput.addEventListener('change', function() {
           var address = this.value;
@@ -87,7 +87,7 @@
                       var lat = parseFloat(data[0].lat);
                       var lon = parseFloat(data[0].lon);
 
-                      map.setView([lat, lon], 14); 
+                      map.setView([lat, lon], 14);
 
                       if (marker) {
                           marker.setLatLng([lat, lon]);
@@ -144,7 +144,7 @@
 
       });
 
-    
+
     </script>
 
       <!-- Min Experience -->
@@ -199,7 +199,7 @@
     </div>
 
     <div class="mt-3">
-      <button class="btn btn-dark" type="submit">Create Job</button>
+      <button class="btn btn-dark" type="submit">Create Trip</button>
       <a href="{% url 'jobs.list' %}" class="btn btn-outline-secondary">Cancel</a>
     </div>
   </form>
