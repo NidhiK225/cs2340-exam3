@@ -48,17 +48,18 @@ class TripForm(forms.ModelForm):
     #         instance.s.add(*to_add)
 
     def save(self, commit=True):
-        instance = super().save(commit=commit)
-        if commit:
-            # If already saved, we can attach s immediately
-            self._save_new_s(instance)
-        else:
-            # Defer until the view calls form.save_m2m()
-            orig_save_m2m = self.save_m2m
+        return super().save(commit=commit)
+        # instance = super().save(commit=commit)
+        # if commit:
+        #     # If already saved, we can attach s immediately
+        #     self._save_new_s(instance)
+        # else:
+        #     # Defer until the view calls form.save_m2m()
+        #     orig_save_m2m = self.save_m2m
 
-            def _wrapped_save_m2m():
-                orig_save_m2m()
-                self._save_new_s(instance)
+        #     def _wrapped_save_m2m():
+        #         orig_save_m2m()
+        #         self._save_new_s(instance)
 
-            self.save_m2m = _wrapped_save_m2m
-        return instance
+        #     self.save_m2m = _wrapped_save_m2m
+        # return instance

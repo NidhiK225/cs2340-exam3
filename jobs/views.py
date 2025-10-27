@@ -39,13 +39,13 @@ def trip_dashboard(request):
     if request.user.is_recruiter:
         trips = Trip.objects.filter(created_by=request.user)
     # ?applications = Application.objects.filter(job__in=jobs)
-        return render(request, 'jobs/dashboard.html', {'jobs': trips})
+        return render(request, 'jobs/dashboard.html', {'trips':trips})
     else:
         return redirect('jobs.list')
 
 def trip_list(request):
-    trips = Trip.object.all()
-    return render(request, 'jobs/trip_list.html', {'trips':trips})
+    trips = Trip.objects.filter(created_by = request.user)
+    return render(request, 'jobs/dashboard.html', {'trips':trips})
 
 # Create new job
 @login_required
@@ -55,10 +55,11 @@ def trip_create(request):
         form = TripForm(request.POST)
         if form.is_valid():
             trip = form.save(commit=False)
+            trip.planner = request.user
             trip.created_by = request.user
             trip.save()
             form.save_m2m()
-            return redirect("jobs.dashboard")
+            return redirect("trip_dashboard")
     else:
         form = TripForm()
     return render(request, "jobs/create.html", {"form": form})

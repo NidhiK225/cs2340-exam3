@@ -1,9 +1,12 @@
-<h1>All Trips</h1>
-<ul>
-  {% for trip in trips %}
-  <li><a href="{% url 'trip_detail' trip.id %}">{{ trip.title }}</a></li>
+{% for trip in trips %}
+<div class = "card mb-3 p-3">
+  <h5>{{ trip.title}} </h5>
+  <p>{{ trip.description }}</p>
+  <p><strong>Location:</strong> {{ trip.location}}</p>
+  <p><strong>Dates:</strong> {{ trip.start_date}} - {{trip.end_date}}</p>
+  <a href = "{% url 'trip.edit' trip.pk %}" class="btn btn-outline-primary">Edit</a>
 
-  {% empty %}
-  <li>No trips Available.</li>
-  {% endfor %}
-</ul>
+</div>
+{% empty %}
+<p>You have no trips yet.</p>
+{% endfor %}

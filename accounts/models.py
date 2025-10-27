@@ -12,7 +12,7 @@ class User(AbstractUser):
     )
 
     @property
-    def is_planner(self) -> bool:
+    def is_recruiter(self) -> bool:
         return self.role == self.Roles.RECRUITER
 
     @property
