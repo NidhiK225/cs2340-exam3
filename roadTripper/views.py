@@ -10,6 +10,38 @@ from .forms import RoadTripperForm
 from django.db.models import Q, Count
 from django.urls import reverse
 from urllib.parse import urlencode
+from .models import TripPost
+from .forms import TripPostForm
+from .forms import RoadTripperForm, TripPostForm  # include TripPostForm
+from .models import roadTripper as RoadTripperModel, TripPost  # include TripPost model
+
+
+@login_required
+@roadtripper_required
+def create_trip_post(request):
+    roadtripper = get_object_or_404(RoadTripperModel, user=request.user)
+
+    if request.method == "POST":
+        form = TripPostForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            trip_post = form.save(commit=False)
+            trip_post.user = request.user
+            trip_post.save()
+            form.save_m2m()
+            messages.success(request, "Trip post created successfully!")
+            return redirect("roadTripper.trip_feed")
+    else:
+        form = TripPostForm(user=request.user)
+
+    template_data = {"form": form}
+    return render(request, "roadTripper/createTrip.html", {"template_data": template_data})
+
+
+@login_required
+def trip_feed(request):
+    posts = TripPost.objects.select_related("roadtripper").prefetch_related("tagged_friends").all().order_by("-created_at")
+    return render(request, "roadTripper/tripFeed.html", {"posts": posts})
+
 
 
 @login_required

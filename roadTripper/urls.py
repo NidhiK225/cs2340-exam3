@@ -5,4 +5,6 @@ urlpatterns = [
     path('<int:id>/', views.show, name='roadTripper.show'),
     path("me/", views.my_profile, name="roadTripper.my_profile"), 
     path("me/edit/", views.edit_profile, name="roadTripper.edit_profile"),
+     path('create_post/', views.create_trip_post, name='roadTripper.create_trip_post'),
+    path('feed/', views.trip_feed, name='roadTripper.trip_feed'),
 ]

@@ -4,6 +4,7 @@ from django.conf import settings  # use settings.AUTH_USER_MODEL
 from django.urls import reverse
 
 
+
 class roadTripper(models.Model):
     
     user = models.OneToOneField(
@@ -77,3 +78,26 @@ class Notification(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["user", "-created_at"])]
+        
+class TripPost(models.Model):
+    roadtripper = models.ForeignKey(
+        'roadTripper',
+        on_delete=models.CASCADE,
+        related_name='trip_posts',
+        null=True,
+        blank=True
+    )
+    photo = models.ImageField(upload_to='trip_photos/', blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+    tagged_friends = models.ManyToManyField(
+        'roadTripper', 
+        related_name='tagged_in_trips',
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.roadtripper.firstName} {self.roadtripper.lastName} - {self.location}"
+
+
