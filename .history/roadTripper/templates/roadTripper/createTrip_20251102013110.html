@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Create a Trip Post</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ template_data.form.as_p }}
+  <button type="submit" class="btn btn-primary">Post</button>
+</form>
+{% endblock %}

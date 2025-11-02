@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Road Tripper Feed</h2>
+
+{% for post in posts %}
+  <div class="card mb-3">
+    {% if post.photo %}
+      <img src="{{ post.photo.url }}" class="card-img-top" alt="Trip Photo">
+    {% endif %}
+    <div class="card-body">
+      <h5 class="card-title">{{ post.roadtripper.firstName }} {{ post.roadtripper.lastName }}</h5>
+      <p class="card-text">{{ post.description }}</p>
+      <p><strong>Location:</strong> {{ post.location }}</p>
+      {% if post.tagged_friends.all %}
+        <p><strong>Tagged:</strong>
+          {% for friend in post.tagged_friends.all %}
+            {{ friend.firstName }} {{ friend.lastName }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </p>
+      {% endif %}
+      <small class="text-muted">{{ post.created_at|date:"M d, Y H:i" }}</small>
+    </div>
+  </div>
+{% empty %}
+  <p>No posts yet!</p>
+{% endfor %}
+{% endblock %}
