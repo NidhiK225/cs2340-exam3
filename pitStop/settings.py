@@ -39,9 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'home',
     'roadTripper',
+    'planner',
     'accounts',
     'django_filters',
-    'jobs',
+    'trip',
     # 'map',
     # 'cart',
 ]

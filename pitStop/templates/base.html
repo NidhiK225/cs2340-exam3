@@ -41,7 +41,7 @@
               <!-- Recruiter-only links -->
               {% if user.is_staff or user.is_recruiter %}
                 <a class="nav-link" href="{% url 'roadTripper.index' %}">Road Trippers</a>
-                <a class="nav-link" href="{% url 'trip_dashboard' %}">My Trips</a>
+                <a class="nav-link" href="{% url 'trip.dashboard' %}">My Trips</a>
               {% endif %}
 
               <!-- Job Seeker-only links -->
