@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from accounts.decorators import recruiter_required, roadtripper_required
+from accounts.decorators import planner_required
 from .models import Planner
 from .forms import PlannerForm
 from django.db.models import Q, Count
@@ -12,7 +12,7 @@ from urllib.parse import urlencode
 
 
 # @login_required
-# @recruiter_required
+# @planner_required
 # def index(request):
 #     """List all job seekers (for recruiters only)."""
 #     name_term = request.GET.get("name", "")
@@ -27,7 +27,7 @@ from urllib.parse import urlencode
 
 
 @login_required
-@recruiter_required
+@planner_required
 def show(request, id):
     """Show details of a single job seeker (for recruiters only)."""
     planner = get_object_or_404(Planner, id=id)
@@ -43,7 +43,7 @@ def show(request, id):
 
 
 @login_required
-@roadtripper_required
+@planner_required
 def my_profile(request):
     """Allow a planner to view their own profile."""
     planner = get_object_or_404(Planner, user=request.user) 
@@ -51,15 +51,15 @@ def my_profile(request):
     template_data = {
         "planner": planner,
         "name": f"{planner.firstName} {planner.lastName}",
-        "travel_budget": planner.travel_budget,
-        "interests": planner.interests,
-        "destinations": planner.destinations,
-        "links": planner.links.all(),
+        # "travel_budget": planner.travel_budget,
+        # "interests": planner.interests,
+        # "destinations": planner.destinations,
+        # "links": planner.links.all(),
     }
     return render(request, "planner/show.html", {"template_data": template_data})
 
 @login_required
-@roadtripper_required
+@planner_required
 def edit_profile(request):
     """Allow a planner to edit their own profile."""
     planner = get_object_or_404(Planner, user=request.user)  

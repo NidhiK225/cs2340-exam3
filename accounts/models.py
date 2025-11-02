@@ -4,26 +4,17 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     class Roles(models.TextChoices):
-        RECRUITER = "RECRUITER", "Recruiter"
-        JOB_SEEKER = "JOB_SEEKER", "Job Seeker"
+        PLANNER = "PLANNER", "Planner"
+        ROAD_TRIPPER = "ROAD_TRIPPER", "Road Tripper"
 
     role = models.CharField(
-        max_length=20, choices=Roles.choices, default=Roles.JOB_SEEKER, db_index=True
+        max_length=20, choices=Roles.choices, default=Roles.ROAD_TRIPPER, db_index=True
     )
 
     @property
-    def is_recruiter(self) -> bool:
-        return self.role == self.Roles.RECRUITER
+    def is_planner(self) -> bool:
+        return self.role == self.Roles.PLANNER
 
     @property
     def is_roadTripper(self) -> bool:
-        return self.role == self.Roles.JOB_SEEKER
-
-
-class PlannerProfile(models.Model):
-    user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name="recruiter_profile")
-    #company_name = models.CharField(max_length=255)
-    website = models.URLField(blank=True)
-    location = models.CharField(max_length=255, blank=True)
-    about = models.TextField(blank=True)
-
+        return self.role == self.Roles.ROAD_TRIPPER

@@ -1,9 +1,9 @@
 from django import forms
-from .models import roadTripper
+from .models import RoadTripper
 
 class RoadTripperForm(forms.ModelForm):
     class Meta:
-        model = roadTripper
+        model = RoadTripper
         fields = [
             "image",
             "firstName",

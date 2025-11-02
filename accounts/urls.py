@@ -4,7 +4,7 @@ from .views import signup_choice, roadTripper_signup, planner_signup, RoleLoginV
 urlpatterns = [
     path("signup/", signup_choice, name="signup.choice"),
     path("signup/roadTripper/", roadTripper_signup, name="signup.roadTripper"),
-    path("signup/recruiter/", planner_signup, name="signup.recruiter"),
+    path("signup/planner/", planner_signup, name="signup.planner"),
     path("map/roadTripper/", planner_signup, name="map.index"),
     path("login/", RoleLoginView.as_view(), name="login"),
     path("logout/", logout_view, name="logout"),  # ✅ use custom view

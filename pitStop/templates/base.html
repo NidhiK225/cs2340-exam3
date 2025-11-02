@@ -38,15 +38,15 @@
 
             <!-- Always visible -->
             {% if user.is_authenticated %}
-              <!-- Recruiter-only links -->
-              {% if user.is_staff or user.is_recruiter %}
-                <a class="nav-link" href="{% url 'roadTripper.index' %}">Road Trippers</a>
-                <a class="nav-link" href="{% url 'trip.dashboard' %}">My Trips</a>
+              <!-- Planner-only links -->
+              {% if user.is_staff or user.is_planner %}
+                <a class="nav-link" href="{% url 'trip.dashboard' %}">Trip Dashboard</a>
+                <a class="nav-link" href="{% url 'planner.my_profile' %}">My Profile</a>
               {% endif %}
 
-              <!-- Job Seeker-only links -->
+              <!-- Road Tripper-only links -->
               {% if user.is_staff or user.is_roadTripper %}
-              <a class="nav-link" href="{% url 'roadTripper.my_profile' %}">My Profile</a>
+                <a class="nav-link" href="{% url 'roadTripper.my_profile' %}">My Profile</a>
               {% endif %}
 
               <div class="vr bg-white mx-2 d-none d-lg-block"></div>
@@ -55,6 +55,7 @@
               <span class="nav-link disabled">Hi, {{ user.username }}</span>
               <a class="nav-link" href="{% url 'logout' %}">Sign out</a>
             {% else %}
+              <a class="nav-link" href="{% url 'home.about' %}">About</a>
               <a class="nav-link" href="{% url 'login' %}">Log in</a>
               <a class="nav-link" href="{% url 'signup.choice' %}">Sign up</a>
             {% endif %}

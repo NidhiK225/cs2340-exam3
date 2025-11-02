@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from accounts.decorators import recruiter_required, roadtripper_required
+from accounts.decorators import planner_required
 from django.contrib import messages
 from .models import Trip
 from .forms import TripForm
@@ -34,9 +34,9 @@ import json
 
 # Recruiter dashboard (see own trips only)
 @login_required
-@recruiter_required
+@planner_required
 def trip_dashboard(request):
-    if request.user.is_recruiter:
+    if request.user.is_planner:
         trips = Trip.objects.filter(created_by=request.user)
     # ?applications = Application.objects.filter(trip__in=trips)
         return render(request, 'trip/dashboard.html', {'trips':trips})
@@ -49,7 +49,7 @@ def trip_list(request):
 
 # Create new trip
 @login_required
-@recruiter_required
+@planner_required
 def trip_create(request):
     if request.method == "POST":
         form = TripForm(request.POST)
@@ -66,7 +66,7 @@ def trip_create(request):
 
 # Edit trip (only if recruiter owns it)
 @login_required
-@recruiter_required
+@planner_required
 def trip_edit(request, pk):
     trip = get_object_or_404(Trip, pk=pk, created_by=request.user)
     if request.method == "POST":
@@ -126,7 +126,7 @@ def trip_edit(request, pk):
 
 # #Review Application
 # @login_required
-# @recruiter_required
+# @planner_required
 # def trip_applications(request, trip_id):
 #     trip = get_object_or_404(Job, id=trip_id, created_by=request.user)
 #     applications = Application.objects.filter(trip=trip)
@@ -143,7 +143,7 @@ def trip_edit(request, pk):
 #     })
 
 # @login_required
-# @recruiter_required
+# @planner_required
 # def update_status(request, application_id):
 #     application = get_object_or_404(Application, id=application_id)
 #     if request.method == "POST":
@@ -159,7 +159,7 @@ def trip_edit(request, pk):
 
 # Show candidate recommendations for a trip (recruiter-owned only)
 # @login_required
-# @recruiter_required
+# @planner_required
 # def trip_recommendations(request, pk):
 #     trip = get_object_or_404(Job, pk=pk, created_by=request.user)
 #     candidates = recommend_candidates_for_trip(trip)
@@ -168,7 +168,7 @@ def trip_edit(request, pk):
 
 # # Debug view to explain inclusion/exclusion reasons per candidate
 # @login_required
-# @recruiter_required
+# @planner_required
 # def trip_recommendations_debug(request, pk):
 #     trip = get_object_or_404(Job, pk=pk, created_by=request.user)
 

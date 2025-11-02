@@ -44,6 +44,6 @@ class Trip(models.Model):
 
 
     def __str__(self):
-        job_title = getattr(self.job, "title", "(no title)")
-        username = getattr(self.user, "username", str(self.user_id))
-        return f"Application by {username} for {job_title}"
+        trip_title = getattr(self.title, "title", "(no title)")
+        username = getattr(self.created_by, "created_by", str(self.created_by))
+        return f"Application by {username} for {trip_title}"

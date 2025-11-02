@@ -4,7 +4,7 @@ from django.conf import settings  # use settings.AUTH_USER_MODEL
 from django.urls import reverse
 
 
-class roadTripper(models.Model):
+class RoadTripper(models.Model):
     
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="roadTripper_profile"
