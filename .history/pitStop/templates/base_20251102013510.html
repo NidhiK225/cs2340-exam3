@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  {% load static %}
+  <head>
+    <title>{{ template_data.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}?v={{ STATIC_REV_CSS }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body class="d-flex flex-column min-vh-100{% if request.resolver_match and request.resolver_match.url_name == 'home.index' %} is-home{% endif %}">
+    <!-- Header -->
+    <nav class="p-3 navbar navbar-light ms-brandbar navbar-expand-lg">
+      <div class="container">
+        <!-- Brand / Logo -->
+        <a class="navbar-brand" href="{% url 'home.index' %}">
+          <img src="{% static 'img/logo.png' %}?v={{ STATIC_REV_LOGO }}" alt="logo" height="40" />
+        </a>
+
+        <!-- Mobile toggle -->
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Links -->
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav ms-auto navbar-ml align-items-lg-center">
+
+            <!-- Always visible -->
+            {% if user.is_authenticated %}
+              <!-- Recruiter-only links -->
+              {% if user.is_staff or user.is_recruiter %}
+                <a class="nav-link" href="{% url 'roadTripper.index' %}">Road Trippers</a>
+                <a class="nav-link" href="{% url 'trip_dashboard' %}">My Trips</a>
+              {% endif %}
+
+              <!-- Job Seeker-only links -->
+              {% if user.is_staff or user.is_roadTripper %}
+              <a class="nav-link" href="{% url 'roadTripper.trip_feed' %}">Trip Feed</a>
+              <a class="nav-link" href="{% url 'roadTripper.create_trip_post' %}">Create Trip</a>
+              <a class="nav-link" href="{% url 'roadTripper.my_profile' %}">My Profile</a>
+              {% endif %}
+
+              <div class="vr bg-white mx-2 d-none d-lg-block"></div>
+
+              <!-- Auth links -->
+              <span class="nav-link disabled">Hi, {{ user.username }}</span>
+              <a class="nav-link" href="{% url 'logout' %}">Sign out</a>
+            {% else %}
+              <a class="nav-link" href="{% url 'login' %}">Log in</a>
+              <a class="nav-link" href="{% url 'signup.choice' %}">Sign up</a>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+    </nav>
+    <!-- Header -->
+
+    <!-- Main Content -->
+    <div class="flex-grow-1">
+      {% block content %}
+      {% endblock content %}
+    </div>
+
+    <!-- Footer -->
+
+
+    <section class="p-3 ms-footer-bottom">
+      <div class="container d-flex justify-content-between">
+        <div class="me-5 text-white">
+          <span>DESIGNED BY
+            <a href="https://www.x.com/danielgarax" target="_blank">DANIEL CORREA</a> &
+            <a href="https://www.x.com/greglim81" target="_blank">GREG LIM</a>
+          </span>
+        </div>
+        <div class="text-white">
+          <span>© Copyright - 2025</span>
+        </div>
+      </div>
+    </section>
+    <!-- Footer -->
+    <!--Script for popups-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            crossorigin="anonymous"></script>
+            {% if messages %}
+            <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+              {% for message in messages %}
+                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="d-flex">
+                    <div class="toast-body">
+                      {{ message }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <script>
+              // Auto-show and auto-hide Bootstrap toasts (fade away after delay)
+              (function(){
+                const toasts = document.querySelectorAll('.toast');
+                toasts.forEach(el => {
+                  try {
+                    const t = new bootstrap.Toast(el, { autohide: true, delay: 4000 });
+                    t.show();
+                  } catch(e) {}
+                });
+              })();
+            </script>
+          {% endif %}
+  </body>
+</html>
