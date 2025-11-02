@@ -46,7 +46,8 @@
 
               <!-- Job Seeker-only links -->
               {% if user.is_staff or user.is_roadTripper %}
-              <a class="nav-link" href="{% url 'roadTripper.my_profile' %}">My Profile</a>
+                <a class="nav-link" href="{% url 'roadTripper.trip_feed' %}">Trip Feed</a>
+                <a class="nav-link" href="{% url 'roadTripper.create_trip_post' %}">Create Trip</a>
               {% endif %}
 
               <div class="vr bg-white mx-2 d-none d-lg-block"></div>
@@ -72,8 +73,6 @@
     </div>
 
     <!-- Footer -->
-
-
     <section class="p-3 ms-footer-bottom">
       <div class="container d-flex justify-content-between">
         <div class="me-5 text-white">
@@ -87,35 +86,34 @@
         </div>
       </div>
     </section>
-    <!-- Footer -->
-    <!--Script for popups-->
+
+    <!-- Toast messages -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             crossorigin="anonymous"></script>
-            {% if messages %}
-            <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
-              {% for message in messages %}
-                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                  <div class="d-flex">
-                    <div class="toast-body">
-                      {{ message }}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                  </div>
-                </div>
-              {% endfor %}
+    {% if messages %}
+      <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        {% for message in messages %}
+          <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+              <div class="toast-body">
+                {{ message }}
+              </div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <script>
-              // Auto-show and auto-hide Bootstrap toasts (fade away after delay)
-              (function(){
-                const toasts = document.querySelectorAll('.toast');
-                toasts.forEach(el => {
-                  try {
-                    const t = new bootstrap.Toast(el, { autohide: true, delay: 4000 });
-                    t.show();
-                  } catch(e) {}
-                });
-              })();
-            </script>
-          {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      <script>
+        (function(){
+          const toasts = document.querySelectorAll('.toast');
+          toasts.forEach(el => {
+            try {
+              const t = new bootstrap.Toast(el, { autohide: true, delay: 4000 });
+              t.show();
+            } catch(e) {}
+          });
+        })();
+      </script>
+    {% endif %}
   </body>
 </html>
