@@ -39,14 +39,18 @@
             <!-- Always visible -->
             {% if user.is_authenticated %}
               <!-- Planner-only links -->
-              {% if user.is_staff or user.is_planner %}
+              {% if not user.is_staff and user.is_planner %}
                 <a class="nav-link" href="{% url 'trip.dashboard' %}">Trip Dashboard</a>
                 <a class="nav-link" href="{% url 'planner.my_profile' %}">My Profile</a>
               {% endif %}
 
               <!-- Road Tripper-only links -->
-              {% if user.is_staff or user.is_roadTripper %}
+              {% if not user.is_staff and user.is_roadTripper %}
                 <a class="nav-link" href="{% url 'roadTripper.my_profile' %}">My Profile</a>
+              {% endif %}
+
+              {% if user.is_staff %}
+                <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
               {% endif %}
 
               <div class="vr bg-white mx-2 d-none d-lg-block"></div>
