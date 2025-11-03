@@ -45,7 +45,7 @@
               {% endif %}
 
               <!-- Road Tripper-only links -->
-              {% if not user.is_staff or user.is_roadTripper %}
+              {% if not user.is_staff and user.is_roadTripper %}
                 <a class="nav-link" href="{% url 'roadTripper.trip_feed' %}">Trip Feed</a>
                 <a class="nav-link" href="{% url 'roadTripper.create_trip_post' %}">Create Trip</a>
                 <a class="nav-link" href="{% url 'map' %}">Map</a>

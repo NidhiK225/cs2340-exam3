@@ -46,6 +46,6 @@ class TripPostForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if user:
-            self.fields['tagged_friends'].queryset = roadTripper.objects.exclude(user=user)
+            self.fields['tagged_friends'].queryset = RoadTripper.objects.exclude(user=user)
         else:
-            self.fields['tagged_friends'].queryset = roadTripper.objects.all()
+            self.fields['tagged_friends'].queryset = RoadTripper.objects.all()
