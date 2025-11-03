@@ -1,12 +1,16 @@
 from django import forms
+<<<<<<< HEAD
 from django.contrib.auth import get_user_model
 from .models import roadTripper, TripPost
 
 User = get_user_model()
+=======
+from .models import RoadTripper
+>>>>>>> planner_profile_3
 
 class RoadTripperForm(forms.ModelForm):
     class Meta:
-        model = roadTripper
+        model = RoadTripper
         fields = [
             "image",
             "firstName",

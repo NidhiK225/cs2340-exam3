@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import roadTripper, Link, TripPost
+from .models import RoadTripper, Link, TripPost
 
-class roadTripperAdmin(admin.ModelAdmin):
+class RoadTripperAdmin(admin.ModelAdmin):
     search_fields = ['firstName', 'lastName', 'headline']
     autocomplete_fields = ('user',)
     list_display = ("full_name", "location")
@@ -10,6 +10,6 @@ class roadTripperAdmin(admin.ModelAdmin):
 class LinkAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
-admin.site.register(roadTripper, roadTripperAdmin)
+admin.site.register(RoadTripper, RoadTripperAdmin)
 admin.site.register(Link, LinkAdmin)
 admin.site.register(TripPost)

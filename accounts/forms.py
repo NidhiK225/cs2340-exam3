@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
-from roadTripper.models import roadTripper
-from .models import PlannerProfile
+from roadTripper.models import RoadTripper
+from planner.models import Planner
 
 class roadTripperignUpForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True)
@@ -14,17 +14,19 @@ class roadTripperignUpForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.role = User.Roles.JOB_SEEKER
+        user.role = User.Roles.ROAD_TRIPPER
         user.first_name = self.cleaned_data["first_name"]
         user.last_name = self.cleaned_data["last_name"]
         if commit:
             user.save()
-            roadTripper.objects.create(user=user, firstName=user.first_name, lastName=user.last_name)
+            RoadTripper.objects.create(user=user, firstName=user.first_name, lastName=user.last_name)
         return user
 
 
 class PlannerSignUpForm(UserCreationForm):
-    #company_name = forms.CharField(max_length=255, required=True)
+    first_name = forms.CharField(max_length=30, required=True)
+    last_name = forms.CharField(max_length=30, required=True)
+
 
     class Meta(UserCreationForm.Meta):
         model = User
@@ -32,9 +34,10 @@ class PlannerSignUpForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.role = User.Roles.RECRUITER
-        # user.is_recruiter = True
+        user.role = User.Roles.PLANNER
+        user.first_name = self.cleaned_data["first_name"]
+        user.last_name = self.cleaned_data["last_name"]
         if commit:
             user.save()
-            PlannerProfile.objects.create(user=user)
+            Planner.objects.create(user=user, firstName=user.first_name, lastName=user.last_name)
         return user

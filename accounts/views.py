@@ -8,22 +8,22 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
 
 from .forms import roadTripperignUpForm, PlannerSignUpForm
-from .models import User, PlannerProfile
-from .decorators import recruiter_required
+from .models import User
+from .decorators import planner_required
 
 
 # ---------- Helpers ----------
 def role_redirect(user):
     """Redirect users after login/signup based on their role."""
-    if user.role == User.Roles.RECRUITER:
-        return reverse("trip_dashboard")
+    if user.role == User.Roles.PLANNER:
+        return reverse("planner.my_profile")
     else:
-        return reverse("roadTripper.my_profile")     # job seeker goes to job listings
+        return reverse("roadTripper.my_profile")     # road tripper goes to profile page
 
 
 # ---------- Signup Views ----------
 def signup_choice(request):
-    """Page where user picks Job Seeker vs Recruiter signup."""
+    """Page where user picks Road Tripper vs Planner signup."""
     return render(request, "accounts/signup_choice.html")
 
 
@@ -37,11 +37,11 @@ def roadTripper_signup(request):
             return redirect(role_redirect(user))
     else:
         form = roadTripperignUpForm()
-    return render(request, "accounts/signup.html", {"form": form, "role": "Job Seeker"})
+    return render(request, "accounts/signup.html", {"form": form, "role": "Road Tripper"})
 
 
 def planner_signup(request):
-    """Sign up flow for recruiters."""
+    """Sign up flow for planners."""
     if request.method == "POST":
         form = PlannerSignUpForm(request.POST)
         if form.is_valid():
@@ -52,7 +52,7 @@ def planner_signup(request):
             return redirect(role_redirect(user))
     else:
         form = PlannerSignUpForm()
-    return render(request, "accounts/signup.html", {"form": form, "role": "Recruiter"})
+    return render(request, "accounts/signup.html", {"form": form, "role": "Planner"})
 
 
 # ---------- Login View ----------
@@ -61,6 +61,7 @@ class RoleLoginView(LoginView):
     template_name = "accounts/login.html"
 
     def get_success_url(self):
+        print(self.request.user.id)
         return role_redirect(self.request.user)
 
 # ---------- Logout View ----------
@@ -71,11 +72,11 @@ def logout_view(request):
     return redirect("home.index")  # send them back to home
 
 
-# ---------- Recruiter Settings ----------
+# ---------- Planner Settings ----------
 # @login_required
 # @recruiter_required
 # def recommendation_settings(request):
-#     profile, _ = RecruiterProfile.objects.get_or_create(user=request.user, defaults={
+#     profile, _ = PlannerProfile.objects.get_or_create(user=request.user, defaults={
 #         "company_name": getattr(request.user, "username", "")
 #     })
 
