@@ -14,7 +14,7 @@ class Trip(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="created_trips",
-        limit_choices_to={"role": "RECRUITER"},
+        limit_choices_to={"role": "PLANNER"},
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -40,10 +40,8 @@ class Trip(models.Model):
 #         max_length=20,
 #         choices=Status.choices,
 #         default=Status.APPLIED,
-#     )
-
-
-    def __str__(self):
-        trip_title = getattr(self.title, "title", "(no title)")
-        username = getattr(self.created_by, "created_by", str(self.created_by))
-        return f"Application by {username} for {trip_title}"
+# #     )
+#     def __str__(self):
+#         trip_title = getattr(self.title, "title", "(no title)")
+#         username = getattr(self.created_by, "created_by", str(self.created_by))
+#         return f"Application by {username} for {trip_title}"
