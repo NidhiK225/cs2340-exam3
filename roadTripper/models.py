@@ -6,7 +6,7 @@ from django.urls import reverse
 
 
 class roadTripper(models.Model):
-    
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="roadTripper_profile"
     )
@@ -42,7 +42,7 @@ class roadTripper(models.Model):
 
     def get_absolute_url(self):
         return reverse("roadTripper.show", args=[self.id])
-    
+
     def __str__(self):
         return f"{self.firstName} {self.lastName}"
 
@@ -59,7 +59,7 @@ class Destination(models.Model):
     """Desired travel locations (e.g., 'Kyoto', 'Patagonia', 'Paris')."""
     city = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100)
-    
+
     def __str__(self):
         if self.city:
             return f"{self.city}, {self.country}"
@@ -78,7 +78,7 @@ class Notification(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["user", "-created_at"])]
-        
+
 class TripPost(models.Model):
     roadtripper = models.ForeignKey(
         'roadTripper',
@@ -91,13 +91,17 @@ class TripPost(models.Model):
     location = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     tagged_friends = models.ManyToManyField(
-        'roadTripper', 
+        'roadTripper',
         related_name='tagged_in_trips',
         blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    lat = models.FloatField(null=True, blank = True)
+    lng = models.FloatField(null = True, blank = True)
 
     def __str__(self):
-        return f"{self.roadtripper.firstName} {self.roadtripper.lastName} - {self.location}"
+        if self.roadtripper:
+            return f"{self.roadtripper.firstName} {self.roadtripper.lastName} - {self.location}"
+        return f"TripPost - {self.location or 'No Location'}"
 
 

@@ -14,8 +14,15 @@ from .models import TripPost
 from .forms import TripPostForm
 from .forms import RoadTripperForm, TripPostForm  # include TripPostForm
 from .models import roadTripper as RoadTripperModel, TripPost  # include TripPost model
+import requests
+from math import radians, cos
+from django.http import JsonResponse
 
 
+@login_required
+@roadtripper_required
+def map_view(request):
+    return render(request, 'roadTripper/map.html')
 @login_required
 @roadtripper_required
 def create_trip_post(request):
@@ -25,6 +32,20 @@ def create_trip_post(request):
         form = TripPostForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             trip_post = form.save(commit=False)
+
+            trip_post.roadtripper = roadtripper
+
+            api_key ="AIzaSyCB1Yppcqoe9_A8euT_t-Pz2odNPTlBtw0"
+            location_text = trip_post.location
+            url = f"https://maps.googleapis.com/maps/api/geocode/json?address={location_text}&key={api_key}"
+
+            response = requests.get(url)
+            data = response.json()
+            if data["status"] == "OK":
+                coords = data["results"][0]["geometry"]["location"]
+                trip_post.lat = coords["lat"]
+                trip_post.lng = coords["lng"]
+
             trip_post.user = request.user
             trip_post.save()
             form.save_m2m()
@@ -79,7 +100,7 @@ def show(request, id):
 @roadtripper_required
 def my_profile(request):
     """Allow a roadTripper to view their own profile."""
-    roadTripper = get_object_or_404(RoadTripperModel, user=request.user) 
+    roadTripper = get_object_or_404(RoadTripperModel, user=request.user)
 
     template_data = {
         "roadTripper": roadTripper,
@@ -95,7 +116,7 @@ def my_profile(request):
 @roadtripper_required
 def edit_profile(request):
     """Allow a roadTripper to edit their own profile."""
-    roadTripper = get_object_or_404(RoadTripperModel, user=request.user)  
+    roadTripper = get_object_or_404(RoadTripperModel, user=request.user)
 
     if request.method == "POST":
         form = RoadTripperForm(request.POST, request.FILES, instance=roadTripper)
@@ -132,4 +153,26 @@ def add_link(request):
 
 
 
+def posts_api(request):
+    lat = float(request.GET.get('lat'))
+    lng = float(request.GET.get('lng'))
+    radius = float(request.GET.get('radius', 10))
 
+    lat_range = radius / 111
+    lng_range = radius / (111 * cos(radians(lat)))
+
+    posts = TripPost.objects.filter(
+        lat__range = (lat-lat_range, lat+lat_range),
+        lng__range=(lng - lng_range, lng + lng_range),
+        roadtripper__isnull=False
+    )
+
+    data = [{
+        "lat": p.lat,
+        "lng": p.lng,
+        "username": p.roadtripper.user.username,
+        "caption":p.description,
+        "image":p.photo.url if p.photo else "",
+        "timestamp":int(p.created_at.timestamp()*1000)
+    } for p in posts]
+    return JsonResponse(data, safe = False)

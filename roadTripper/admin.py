@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import roadTripper, Link
+from .models import roadTripper, Link, TripPost
 
 class roadTripperAdmin(admin.ModelAdmin):
     search_fields = ['firstName', 'lastName', 'headline']
@@ -12,3 +12,4 @@ class LinkAdmin(admin.ModelAdmin):
 
 admin.site.register(roadTripper, roadTripperAdmin)
 admin.site.register(Link, LinkAdmin)
+admin.site.register(TripPost)
