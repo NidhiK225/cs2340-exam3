@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
@@ -57,18 +58,64 @@
                 const marker = new google.maps.Marker({
                     position: {lat: post.lat, lng: post.lng },
                     map,
-                    title: post.username
+                    title: post.username,
+                    icon: {
+                        url: "{% static 'img/profilePic.jpg' %}",
+                        scaledSize: new google.maps.Size(40, 40),
+                    },
                 });
 
+
+                // const infoWindow = new google.maps.InfoWindow({
+                //     content: `
+                //     <strong>${post.username}</strong><br>
+                //     ${post.caption}<br>
+                //     <img src="${post.image || 'https://via.placeholder.com/100'}" width="100"/>
+                //     ${new Date(post.timestamp).toLocaleString()}
+                //     `
+                // });
 
                 const infoWindow = new google.maps.InfoWindow({
                     content: `
-                    <strong>${post.username}</strong><br>
-                    ${post.caption}<br>
-                    <img src="${post.image || 'https://via.placeholder.com/100'}" width="100"/>
-                    ${new Date(post.timestamp).toLocaleString()}
-                    `
-                });
+                        <div style="width: 250px; font-family: sans-serif; border: 1px solid #ddd; border-radius: 3px; background-color: white;">
+                            <div style="display: flex; align-items: center; padding 8px 10px;">
+                                <div style="width: 30px; height: 30px; border-radius: 50%; background-color: #ccc; margin-right: 8px;"></div>
+                                <strong style="font-size: 14px;">${post.username || 'ROAD TRIPPER USERNAME'}</strong>
+                                </div>
+
+                                <div style="width: 100%; height: auto; border-top: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <img
+                                        src = "${post.image}"
+                                        alt = "post image"
+                                        style = "width: 100%; display: block; max-height: 200px; object-fit:cover;"
+                                        />
+                                        </div>
+
+                                        <div style="padding: 8px 10px;">
+                                            <div style = "margin-bottom: 8px; font-size: 18px;">
+                                                <span>&#x2764;</span> <span style="margin-left: 10px;">&#x1F4AD;</span> <span style="float: right;">&#x1F516;</span> </div>
+
+                                            <p style="margin: 0; font-size: 14px; line-height: 1.2;">
+                                                <strong>${post.username || 'user'}:</strong>
+                                                ${post.caption || 'CAPTION'}<br>
+                                                <span style="color: #00376b; font-size: 12px;">
+                                                    ${ (post.tagged_friends && post.tagged_friends.length > 0) ?
+                                                        `Tagged: ${post.tagged_friends.map(friend => `@${friend}`).join(', ')}`
+                                                    : ''
+
+                                                }
+
+                                                    </span>
+                                            </p>
+                                            <div style="color: #999; font-size: 10px; margin-top: 5px;">
+                    ${new Date(post.timestamp).toLocaleDateString()}
+                </div>
+            </div>
+        </div>
+    `
+});
+
+
 
                 marker.addListener("click", () => infoWindow.open(map, marker));
                 markers.push(marker);
