@@ -5,7 +5,7 @@ from django.conf import settings
 def static_revisions(request):
     """Expose simple cache-busting revisions for key static assets."""
     base = Path(settings.BASE_DIR)
-    logo_path = base / 'pitStop' / 'static' / 'img' / 'logo.png'
+    logo_path = base / 'pitStop' / 'static' / 'img' / 'brand.png'
     try:
         rev_logo = str(int(os.path.getmtime(logo_path)))
     except Exception:

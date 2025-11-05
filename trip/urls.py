@@ -6,6 +6,7 @@ urlpatterns = [
     path("dashboard/", views.trip_dashboard, name="trip.dashboard"),
     path("create/", views.trip_create, name="trips.create"),
     path("<int:pk>/edit/", views.trip_edit, name="trip.edit"),
+    path("<int:pk>/suggestions/", views.trip_suggestions, name="trip.suggestions"),
     # path("<int:pk>/recommendations/", views.job_recommendations, name="jobs.recommendations"),
     # path("<int:pk>/recommendations/debug/", views.job_recommendations_debug, name="jobs.recommendations_debug"),
     # path('apply/<int:job_id>/', views.apply_job, name='apply_job'),

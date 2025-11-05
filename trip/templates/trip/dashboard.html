@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container py-4">
-  <h2>My Trips</h2>
+  <h2 class="page-title">My Trips</h2>
   <a href="{% url 'trips.create' %}" class="btn btn-dark mb-3">+ Post New Trip</a>
 
 {% for trip in trips %}
@@ -10,6 +10,10 @@
     <p>{{ trip.description }}</p>
     <p><strong>Location:</strong> {{ trip.location}}</p>
     <p><strong>Dates:</strong> {{ trip.start_date}} - {{trip.end_date}}</p>
+    <div>
+      <a href="{% url 'trip.edit' trip.id %}" class="btn btn-sm btn-outline-secondary me-2">Edit</a>
+      <a href="{% url 'trip.suggestions' trip.id %}" class="btn btn-sm btn-dark">AI Suggestions</a>
+    </div>
 
   </div>
 {% empty %}
