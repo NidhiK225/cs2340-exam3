@@ -15,6 +15,29 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Lightweight .env loader (no external dependency)
+def _load_dotenv(path: Path):
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            for raw in f:
+                line = raw.strip()
+                if not line or line.startswith('#'):
+                    continue
+                if '=' not in line:
+                    continue
+                # support lines like: export KEY=VALUE
+                if line.startswith('export '):
+                    line = line[len('export '):]
+                k, v = line.split('=', 1)
+                k = k.strip()
+                v = v.strip().strip('"').strip("'")
+                # Always override to make .env authoritative for this process
+                os.environ[k] = v
+    except FileNotFoundError:
+        pass
+
+_load_dotenv(BASE_DIR / '.env')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -143,3 +166,6 @@ STATICFILES_DIRS = [
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# Expose OPENAI_API_KEY to Django settings for services to consume
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')

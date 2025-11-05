@@ -7,34 +7,33 @@
 
 /* Theme tokens */
 :root {
-  --bg: #ffffff;
-  --bg-alt: #f6f7f9;
-  --surface: #ffffff;
-  --surface-2: #f2f3f5;
+  --bg: #fcf2d4;      /* light cream */
+  --bg-alt: #ebdaa2;  /* beige */
+  --surface: #ffffff; 
+  --surface-2: #f6f6f0;
   --text: #1b1f23;
   --muted: #6b7280;
   --border: #e5e7eb;
 
-  /* Brand palette */
-  --brand-blue-1: #99C3EC;   /* primary */
-  --brand-blue-2: #AAD2EC;
-  --brand-cyan:   #BCECE6;
-  --brand-mint:   #97E3C2;
-  --brand-peach:  #FFEED9;
-  --brand-pink:   #F69C9E;
+  /* Brand palette (greens + neutrals) */
+  --brand-cream:  #fcf2d4;
+  --brand-sage:   #718b51; /* primary */
+  --brand-ltgrn:  #bcce98;
+  --brand-beige:  #ebdaa2;
+  --brand-deep:   #506036; /* dark */
 
-  --primary: var(--brand-blue-1);
-  --primary-contrast: #0b0d10;
-  --link: var(--brand-blue-1);
-  --success: var(--brand-mint);
-  --warning: var(--brand-peach);
-  --danger: var(--brand-pink);
+  --primary: var(--brand-sage);
+  --primary-contrast: #ffffff;
+  --link: var(--brand-deep);
+  --success: var(--brand-ltgrn);
+  --warning: var(--brand-beige);
+  --danger: #d06a6c; /* harmonized red */
 
   --shadow: 0 6px 20px rgba(0,0,0,0.08);
   --radius: 10px;
   --radius-sm: 8px;
   --radius-xs: 6px;
-  --focus: 0 0 0 0.2rem rgba(153,195,236,0.35); /* based on brand-blue-1 */
+  --focus: 0 0 0 0.2rem rgba(120,147,99,0.35); /* based on brand-sage */
   --transition: 180ms ease;
 }
 
@@ -78,7 +77,7 @@ a:hover { opacity: 0.9; }
 
 /* Hero / index background */
 .bg-index{
-  background: url("/static/img/background.jpg") no-repeat fixed;
+  background: url("/static/img/brand.png") no-repeat center center fixed;
   background-size: cover;
 }
 
@@ -91,8 +90,7 @@ a:hover { opacity: 0.9; }
 
 /* Brand header bar */
 .ms-brandbar {
-  background-color: #99C3EC; /* fallback */
-  background: linear-gradient(90deg, var(--brand-blue-1), var(--brand-cyan)) !important;
+  background: var(--primary) !important;
   border-bottom: 2px solid rgba(0,0,0,0.06);
 }
 .ms-brandbar .nav-link,
@@ -132,7 +130,7 @@ a:hover { opacity: 0.9; }
 .btn-primary:hover { filter: brightness(0.95); }
 .btn-outline-secondary { color: var(--text); border-color: var(--border); }
 .btn-outline-secondary:hover { background: var(--surface-2); }
-.btn-dark { background: #111827; border-color: #111827; }
+.btn-dark { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; }
 
 /* Subtle button animations */
 .btn {
@@ -190,56 +188,38 @@ a:hover { opacity: 0.9; }
 
 /* Footer */
 .ms-footer {
-  background-color: #99C3EC; /* fallback */
-  background: linear-gradient(90deg, var(--brand-blue-1), var(--brand-cyan)) !important;
+  background: var(--primary) !important;
   border-top: 2px solid rgba(0,0,0,0.06);
 }
 .ms-footer p { color: var(--primary-contrast); font-size: 13px; }
 .ms-footer a { color: var(--primary-contrast); }
 .ms-footer a:hover { opacity: 0.9; text-decoration: none; }
-.ms-footer-bottom { background-color: #99C3EC; background: linear-gradient(90deg, var(--brand-blue-1), var(--brand-cyan)) !important; border-top: 0; }
+.ms-footer-bottom { background: var(--primary) !important; border-top: 0; }
 .ms-footer-bottom span{ font-size: 13px; line-height: 38px; }
 .ms-footer-bottom a { color: var(--primary-contrast); text-decoration: none; }
 .ms-footer-bottom a:hover { opacity: 0.9; }
 
 /* Home: make entire page a single animated blue gradient */
-body.is-home {
-  /* Fallback solid color for very old browsers */
-  background: #99C3EC;
-  /* Larger, multi-color animated gradient for home */
-  background: linear-gradient(-45deg,
-    var(--brand-blue-1), var(--brand-blue-2), var(--brand-cyan), var(--brand-mint), var(--brand-peach), var(--brand-pink), var(--brand-blue-2));
-  background-size: 600% 600%;
-  animation: msGradientMove 28s ease infinite;
-  /* Force high-contrast text on colorful gradient */
-  color: #ffffff;
-}
-.is-home a, .is-home .navbar .nav-link, .is-home .navbar .navbar-brand, .is-home .ms-footer-bottom span { color: #ffffff !important; }
-.is-home .btn-outline-primary { color: #ffffff; border-color: rgba(255,255,255,0.7); }
-.is-home .btn-outline-primary:hover { background: rgba(255,255,255,0.1); }
-.is-home a { color: var(--primary-contrast); }
+body.is-home { background: var(--primary); color: #ffffff; }
+.is-home .navbar .nav-link, .is-home .navbar .navbar-brand, .is-home .ms-footer-bottom span { color: #ffffff !important; }
+.is-home a { color: #ffffff; }
 .is-home a:hover { opacity: 0.9; }
 
-/* Make header/footer transparent on home so gradient is continuous */
-.is-home .ms-brandbar,
-.is-home .ms-footer,
-.is-home .ms-footer-bottom {
-  background: transparent !important;
-  border: 0 !important;
-}
-.is-home .navbar { backdrop-filter: none; }
+/* White page title helper */
+.page-title { color: #ffffff !important; }
+.is-home a, .is-home .navbar .nav-link, .is-home .navbar .navbar-brand, .is-home .ms-footer-bottom span { color: var(--text) !important; }
+.is-home .btn-outline-primary { color: var(--primary); border-color: var(--primary); }
+.is-home .btn-outline-primary:hover { background: var(--primary); color: var(--primary-contrast); }
+.is-home .ms-brandbar, .is-home .ms-footer, .is-home .ms-footer-bottom { background: var(--primary) !important; }
 
-/* Respect reduced-motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  body.is-home { animation: none; }
-}
-.is-home .home-hero { min-height: calc(100vh - 0px); }
+/* Home hero banner: no background image (logo shown in markup) */
+.home-hero { min-height: 60vh; }
 
-@keyframes msGradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+/* Utility overrides to align Bootstrap helpers */
+.bg-primary { background-color: var(--primary) !important; }
+.text-primary { color: var(--primary) !important; }
+.btn-outline-primary { color: var(--primary); border-color: var(--primary); }
+.btn-outline-primary:hover { background-color: var(--primary); color: var(--primary-contrast); }
 
 /* Imagery */
 .img-card-200 {

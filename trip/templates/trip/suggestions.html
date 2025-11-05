@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <a href="{% url 'trip.dashboard' %}" class="btn btn-outline-secondary mb-3">Back to Dashboard</a>
+  <div class="d-flex align-items-center justify-content-between mb-2">
+    <h2>AI Suggestions for: {{ trip.title }}</h2>
+    {% if provider %}
+      <span class="badge bg-primary">Provider: {{ provider }}</span>
+    {% endif %}
+  </div>
+  <p class="text-muted">Location: {{ trip.location }} | Dates: {{ trip.start_date }} – {{ trip.end_date }}</p>
+
+  <form method="post" class="card p-3 mb-4">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Interests (comma-separated)</label>
+        <input name="interests" class="form-control" placeholder="e.g., food, museums, nature" value="{{ preferences.interests|default:'' }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Vibe</label>
+        <select name="vibe" class="form-select">
+          {% for v in vibe_options %}
+          <option value="{{ v }}" {% if preferences.vibe == v %}selected{% endif %}>{{ v|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Party</label>
+        <select name="party" class="form-select">
+          {% for v in party_options %}
+          <option value="{{ v }}" {% if preferences.party == v %}selected{% endif %}>{{ v|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Budget Flexibility</label>
+        <select name="budget_flexibility" class="form-select">
+          {% for v in budget_options %}
+          <option value="{{ v }}" {% if preferences.budget_flexibility == v %}selected{% endif %}>{{ v|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-dark mt-3" type="submit">Get Suggestions</button>
+  </form>
+
+  {% if error %}
+    <div class="alert alert-warning">LLM error: {{ error }}. Showing local suggestions if available.</div>
+  {% endif %}
+
+  {% if suggestions %}
+  <div class="row g-3">
+    {% for a in suggestions %}
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{ a.name }}</h5>
+          <p class="card-subtitle text-muted mb-2">{{ a.category }} • {{ a.suggested_time }}</p>
+          <p class="card-text">{{ a.description }}</p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <small>{{ a.location }}</small>
+          <small class="text-muted">{{ a.cost_estimate }}</small>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p class="text-muted">No suggestions returned. Try adjusting inputs.</p>
+  {% endif %}
+
+  <div class="mt-4">
+    <p class="text-muted">Tip: Set <code>OPENAI_API_KEY</code> in .env for live LLM-powered suggestions. Without it, local suggestions are shown.</p>
+  </div>
+</div>
+{% endblock %}

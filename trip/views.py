@@ -4,6 +4,7 @@ from accounts.decorators import planner_required
 from django.contrib import messages
 from .models import Trip
 from .forms import TripForm
+from .services.suggestions import suggest_activities
 #from .services.recommendations import recommend_candidates_for_trip
 # from .filters import JobFilter
 import requests
@@ -78,6 +79,55 @@ def trip_edit(request, pk):
         form = TripForm(instance=trip)
 
     return render(request, "trip/edit.html", {"form": form, "trip": trip})
+
+
+# AI suggestions for a trip (planner-owned only)
+@login_required
+@planner_required
+def trip_suggestions(request, pk):
+    trip = get_object_or_404(Trip, pk=pk, created_by=request.user)
+    suggestions = None
+    provider = None
+    error = None
+
+    vibe_options = ["relaxed", "balanced", "active"]
+    party_options = ["adults", "family", "kids"]
+    budget_options = ["conservative", "moderate", "splurge"]
+
+    default_preferences = {
+        "interests": "",
+        "vibe": "balanced",
+        "party": "adults",
+        "budget_flexibility": "moderate",
+    }
+
+    if request.method == "POST":
+        preferences = {
+            "interests": request.POST.get("interests", "").strip(),
+            "vibe": request.POST.get("vibe", "balanced").strip(),
+            "party": request.POST.get("party", "adults").strip(),
+            "budget_flexibility": request.POST.get("budget_flexibility", "moderate").strip(),
+        }
+        res = suggest_activities(trip, preferences, max_items=8)
+        suggestions = res.get("activities", [])
+        provider = res.get("provider")
+        error = res.get("error")
+    else:
+        preferences = default_preferences
+    return render(
+        request,
+        "trip/suggestions.html",
+        {
+            "trip": trip,
+            "suggestions": suggestions,
+            "provider": provider,
+            "error": error,
+            "preferences": preferences,
+            "vibe_options": vibe_options,
+            "party_options": party_options,
+            "budget_options": budget_options,
+        },
+    )
 
 #Apply Job
 # @login_required
