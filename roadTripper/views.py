@@ -101,8 +101,8 @@ def show(request, id):
 # @roadtripper_required
 def my_profile(request):
     """Allow a roadTripper to view their own profile."""
-    roadTripper = get_object_or_404(RoadTripper, user=request.user) 
-    
+    roadTripper = get_object_or_404(RoadTripper, user=request.user)
+
     template_data = {
         "roadTripper": roadTripper,
         "name": f"{roadTripper.firstName} {roadTripper.lastName}",
@@ -117,7 +117,7 @@ def my_profile(request):
 @roadtripper_required
 def edit_profile(request):
     """Allow a roadTripper to edit their own profile."""
-    roadTripper = get_object_or_404(RoadTripper, user=request.user)  
+    roadTripper = get_object_or_404(RoadTripper, user=request.user)
 
     if request.method == "POST":
         form = RoadTripperForm(request.POST, request.FILES, instance=roadTripper)
@@ -174,6 +174,18 @@ def posts_api(request):
         "username": p.roadtripper.user.username,
         "caption":p.description,
         "image":p.photo.url if p.photo else "",
-        "timestamp":int(p.created_at.timestamp()*1000)
+        "timestamp":int(p.created_at.timestamp()*1000),
+
+        "tagged_friends": [
+            friend.user.username
+            for friend in p.tagged_friends.all()
+            if friend.user is not None
+        ]
     } for p in posts]
+
+    # print("--- DEBUG TAGGED FRIENDS ---")
+    # for post_data in data:
+    #     if post_data.get("taggedFriends"):
+    #         print(f"Post by {post_data['username']} has tags: {post_data['taggedFriends']}")
+    # print("----------------------------")
     return JsonResponse(data, safe = False)
