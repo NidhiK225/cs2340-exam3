@@ -1,7 +1,9 @@
+import os
 from datetime import date
 from typing import Any, Dict
 
 from .providers import local as local_provider
+from .providers import gemini as gemini_provider
 from .providers import openai as openai_provider
 
 
@@ -39,19 +41,53 @@ def _build_prompt(trip, preferences: Dict[str, Any], max_items: int) -> str:
 
 
 def suggest_activities(trip, preferences: Dict[str, Any], max_items: int = 8) -> Dict[str, Any]:
-    """Top-level suggestion service.
+    """Top-level suggestion service with dual provider support.
 
-    Order: OpenAI (if configured) else Local fallback.
+    Selection order:
+    - If LLM_PROVIDER is set (gemini|openai), try that first, then the other, then local.
+    - Else auto-detect: if GEMINI_API_KEY -> gemini; elif OPENAI_API_KEY -> openai; else local.
     """
     prompt = _build_prompt(trip, preferences, max_items)
-    # Try OpenAI first
-    res = openai_provider.suggest(trip, prompt, max_items=max_items)
-    if res.get("activities"):
-        return res
+
+    provider_pref = (os.getenv("LLM_PROVIDER") or "").strip().lower()
+    has_gemini = bool(os.getenv("GEMINI_API_KEY"))
+    has_openai = bool(os.getenv("OPENAI_API_KEY"))
+
+    def try_gemini():
+        return gemini_provider.suggest(trip, prompt, max_items=max_items)
+
+    def try_openai():
+        return openai_provider.suggest(trip, prompt, max_items=max_items)
+
+    # Build ordered list of providers to attempt
+    order = []
+    if provider_pref in ("gemini", "openai"):
+        order = [provider_pref, "openai" if provider_pref == "gemini" else "gemini"]
+    else:
+        if has_gemini:
+            order.append("gemini")
+        if has_openai:
+            order.append("openai")
+
+    # Try providers in order
+    for p in order:
+        if p == "gemini" and has_gemini:
+            res = try_gemini()
+            if res.get("activities"):
+                return res
+            last_error = res.get("error")
+        elif p == "openai" and has_openai:
+            res = try_openai()
+            if res.get("activities"):
+                return res
+            last_error = res.get("error")
+
     # Fallback to local heuristic
     local = local_provider.suggest(trip, preferences, max_items=max_items)
-    # Propagate error message from provider if any, but include local activities
-    if res.get("error") and local.get("activities"):
-        local["error"] = res["error"]
+    # Attach last provider error if any
+    try:
+        if 'last_error' in locals() and last_error:
+            local["error"] = last_error
+    except Exception:
+        pass
     return local
-

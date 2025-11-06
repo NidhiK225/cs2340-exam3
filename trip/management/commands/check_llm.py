@@ -2,7 +2,7 @@ from types import SimpleNamespace
 from datetime import date, timedelta
 from django.core.management.base import BaseCommand
 
-from trip.services.llm import suggest_activities
+from trip.services.suggestions import suggest_activities
 
 
 class Command(BaseCommand):
@@ -29,4 +29,3 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f"Error: {error}"))
         for i, a in enumerate(activities, 1):
             self.stdout.write(f"{i}. {a.get('name')} — {a.get('location')} ({a.get('category')})")
-
