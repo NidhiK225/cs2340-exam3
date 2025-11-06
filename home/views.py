@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 def index(request):
     template_data = {}
-    template_data['title'] = 'The Job App'
+    template_data['title'] = 'Pit Stop'
     return render(request, 'home/index.html',
                   {'template_data': template_data})
 
