@@ -13,11 +13,13 @@ from .decorators import planner_required
 
 
 # ---------- Helpers ----------
-def role_redirect(user):
+def role_redirect(request, user):
     """Redirect users after login/signup based on their role."""
-    if user.role == User.Roles.PLANNER:
+    if user.is_superuser:
+        return reverse("home.index")
+    elif user.role == User.Roles.PLANNER:
         return reverse("planner.my_profile")
-    else:
+    elif user.role == User.Roles.ROAD_TRIPPER:
         return reverse("roadTripper.my_profile")     # road tripper goes to profile page
 
 
@@ -62,7 +64,7 @@ class RoleLoginView(LoginView):
 
     def get_success_url(self):
         print(self.request.user.id)
-        return role_redirect(self.request.user)
+        return role_redirect(self.request, self.request.user)
 
 # ---------- Logout View ----------
 
