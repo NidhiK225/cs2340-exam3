@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List
 
+import time
 import requests
 from django.conf import settings
 
@@ -42,19 +43,33 @@ def suggest(trip, prompt: str, max_items: int = 8) -> Dict[str, Any]:
         headers["OpenAI-Project"] = project
 
     try:
-        resp = requests.post(
-            f"{base_url.rstrip('/')}/chat/completions",
-            headers=headers,
-            json={
-                "model": model,
-                "messages": [
-                    {"role": "system", "content": "You are a concise, structured travel planning assistant."},
-                    {"role": "user", "content": prompt},
-                ],
-                "temperature": 0.7,
-            },
-            timeout=20,
-        )
+        # Tunable timeouts and retries
+        timeout_s = float(os.getenv("LLM_TIMEOUT_SECONDS", "25"))
+        retries = int(os.getenv("LLM_RETRIES", "2"))
+        last_err = None
+        for attempt in range(retries):
+            try:
+                resp = requests.post(
+                    f"{base_url.rstrip('/')}/chat/completions",
+                    headers=headers,
+                    json={
+                        "model": model,
+                        "messages": [
+                            {"role": "system", "content": "You are a concise, structured travel planning assistant."},
+                            {"role": "user", "content": prompt},
+                        ],
+                        "temperature": 0.7,
+                    },
+                    timeout=timeout_s,
+                )
+                break
+            except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError) as e:  # noqa: PERF203
+                last_err = e
+                # simple backoff
+                time.sleep(1.5 * (attempt + 1))
+                resp = None
+        if resp is None:
+            return {"activities": [], "provider": "openai", "error": f"OpenAI request failed: {last_err}"}
         if resp.status_code != 200:
             detail = None
             try:
@@ -88,4 +103,3 @@ def suggest(trip, prompt: str, max_items: int = 8) -> Dict[str, Any]:
         return {"activities": norm, "provider": "openai", "error": None}
     except Exception as exc:  # noqa: BLE001
         return {"activities": [], "provider": "openai", "error": str(exc)}
-
