@@ -19,7 +19,7 @@ def suggest(latitude:float, longitude:float, prompt: str, max_items: int = 8) ->
     if not api_key:
         return {"activities": [], "provider": "gemini", "error": "GEMINI_API_KEY not set"}
 
-    model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     base = os.getenv("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com")
     url = f"{base.rstrip('/')}/v1beta/models/{model}:generateContent?key={api_key}"
 

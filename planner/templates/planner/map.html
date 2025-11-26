@@ -62,13 +62,27 @@
             <p style="color: red;">Error: {{ error }}</p>
         {% elif suggestions %}
         <h3>Found {{ suggestions|length }} Suggestions (via {{provider}}):</h3>
-        <ul style="max-height:300px; overflow-y:auto;">
+        <ul>
             {% for item in suggestions %}
-            <li><strong>{{ item.name }}</strong></li>
+            <li>
+                <strong>{{ item.name }}</strong>({{ item.cost_estimate }})
+
+                <p style="margin: 5px 0; font-size: 0.9em;">
+                    {{ item.description }}
+                </p>
+
+                <button
+                onclick = "openAddStopModal(
+                    '{{ item.name|escapejs }}',
+                    '{{ item.description|escapejs }}',
+                    '{{ item.cost_estimate|escapejs }}'
+                )"
+                >
+                Add Stop
+            </button>
+            </li>
             {% endfor %}
         </ul>
-        {% else %}
-        <p>Search a location on the map, adjust your preferences, and click 'Get Suggestions'.</p>
         {% endif %}
     </div>
 </div>
@@ -79,6 +93,7 @@
 
 
     function initMap() {
+
         map = new google.maps.Map(document.getElementById("map"), {
             center: { lat: 39.8283, lng: -98.5795},
             zoom: 4
