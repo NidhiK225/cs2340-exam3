@@ -10,6 +10,20 @@ from django.db.models import Q, Count
 from django.urls import reverse
 from urllib.parse import urlencode
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+
+
+
+from django.db.models import Q, Count
+from django.urls import reverse
+from urllib.parse import urlencode
+
+import requests
+from math import radians, cos
+from django.http import JsonResponse
 
 # @login_required
 # @planner_required
@@ -24,7 +38,10 @@ from urllib.parse import urlencode
 #     }
 #     return render(request, "planner/index.html", {"template_data": template_data})
 
-
+@login_required
+@planner_required
+def map_view(request):
+    return render(request, 'planner/map.html')
 
 @login_required
 @planner_required
@@ -46,7 +63,7 @@ def show(request, id):
 @planner_required
 def my_profile(request):
     """Allow a planner to view their own profile."""
-    planner = get_object_or_404(Planner, user=request.user) 
+    planner = get_object_or_404(Planner, user=request.user)
 
     template_data = {
         "planner": planner,
@@ -62,7 +79,7 @@ def my_profile(request):
 @planner_required
 def edit_profile(request):
     """Allow a planner to edit their own profile."""
-    planner = get_object_or_404(Planner, user=request.user)  
+    planner = get_object_or_404(Planner, user=request.user)
 
     if request.method == "POST":
         form = PlannerForm(request.POST, request.FILES, instance=planner)

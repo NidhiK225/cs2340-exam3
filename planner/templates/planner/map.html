@@ -1,0 +1,54 @@
+{% extends 'pitStop/base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+
+<div id="search-container">
+    <input id="search" type="text" placeholder="Enter a location">
+    <button id="searchBtn">Go</button>
+</div>
+
+
+<div id="map" style="height:600px;width:100%"></div>
+
+
+<script>
+    let map;
+    let markers = [];
+
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: 39.8283, lng: -98.5795},
+            zoom: 4
+        });
+
+
+        const input = document.getElementById("search");
+        const autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo("bounds", map);
+
+
+        autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (!place.geometry) return alert("No details available for that location");
+            map.setCenter(place.geometry.location);
+            map.setZoom(12);
+
+
+            //fetchPosts(place.geometry.location.lat(), place.geometry.location.lng());
+
+
+        });
+
+
+    }
+
+</script>
+<script src ="https://maps.googleapis.com/maps/api/js?key=AIzaSyCB1Yppcqoe9_A8euT_t-Pz2odNPTlBtw0&libraries=places&callback=initMap" async defer></script>
+
+{% endblock content %}
+
+
