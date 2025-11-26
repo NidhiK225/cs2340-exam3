@@ -19,7 +19,7 @@ def _read_key_file() -> str | None:
     return None
 
 
-def suggest(trip, prompt: str, max_items: int = 8) -> Dict[str, Any]:
+def suggest(latitude:float,longitude:float, prompt: str, max_items: int = 8) -> Dict[str, Any]:
     """Call OpenAI Chat Completions to get JSON activities.
 
     Returns {"activities": [...], "provider": "openai", "error": str|None}
@@ -96,7 +96,7 @@ def suggest(trip, prompt: str, max_items: int = 8) -> Dict[str, Any]:
                 "category": a.get("category"),
                 "description": a.get("description"),
                 "suggested_time": a.get("suggested_time"),
-                "location": a.get("location") or getattr(trip, 'location', None),
+                "location": a.get("location"),
                 "cost_estimate": a.get("cost_estimate"),
                 "tags": a.get("tags") or [],
             })

@@ -2,14 +2,18 @@ from datetime import date
 from typing import Any, Dict, List
 
 
-def suggest(trip, preferences: Dict[str, Any], max_items: int = 8) -> Dict[str, Any]:
+def suggest(latitude:float, longitude:float, preferences: Dict[str, Any], max_items: int = 8) -> Dict[str, Any]:
     """Local heuristic suggestions (no network). Always succeeds.
 
     Returns a dict: {"activities": [...], "provider": "local", "error": None}
     """
-    location = getattr(trip, "location", "the destination") or "the destination"
-    start = getattr(trip, "start_date", None)
-    end = getattr(trip, "end_date", None)
+    # location = getattr(trip, "location", "the destination") or "the destination"
+    # start = getattr(trip, "start_date", None)
+    # end = getattr(trip, "end_date", None)
+
+    location = f"near ({latitude:.2f}, {longitude:.2f})"
+    start = None
+    end = None
 
     interests = [s.strip().lower() for s in (preferences.get("interests") or "").split(",") if s.strip()]
     vibe = (preferences.get("vibe") or "balanced").lower()
