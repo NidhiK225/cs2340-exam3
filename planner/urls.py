@@ -5,5 +5,5 @@ urlpatterns = [
     path('<int:id>/', views.show, name='planner.show'),
     path("me/", views.my_profile, name="planner.my_profile"),
     path("me/edit/", views.edit_profile, name="planner.edit_profile"),
-    path('map/', views.map_view, name = 'map'),
+    path('map/', views.trip_map_and_suggestions, name = 'map'),
 ]

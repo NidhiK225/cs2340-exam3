@@ -4,15 +4,74 @@
 
 {% block content %}
 
+<div style="display: flex; gap: 20px; min-height:600px;">
+    <div style="flex: 3;">
+        <div id="search-container">
+            <input id="search" type="text" placeholder="Enter a location">
+            <button id="searchBtn">Go</button>
+        </div>
+        <div id="map" style="height:600px; width:100%;"></div>
+    </div>
 
-<div id="search-container">
-    <input id="search" type="text" placeholder="Enter a location">
-    <button id="searchBtn">Go</button>
+    <div style="flex: 1; min-width: 300px; padding: 10px; border-left: 1px solid #eee;">
+        <h2>Activity Suggestions</h2>
+        <form method = "POST">
+            {% csrf_token %}
+            <input type="hidden" id="suggestion-latitude" name="latitude" value="">
+            <input type="hidden" id="suggestion-longitude" name="longitude" value="">
+
+            <label for="interests">Interests (e.g., hiking, food):</label>
+            <input
+                type="text"
+                id="interests"
+                name="interests"
+                value="{{ preferences.interests|default:'' }}"
+            >
+            <label for="vibe">Vibe: </label>
+            <select id="vibe" name="vibe">
+                {% for option in vibe_options %}
+                <option value = "{{ option }}" {% if preferences.vibe == option %}selected{% endif %}>
+                    {{ option|capfirst }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label for="party">Party Size: </label>
+            <select id="party" name="party">
+                {% for option in party_options %}
+                <option value = "{{ option }}" {% if preferences.party == option %}selected{% endif %}>
+                    {{ option|capfirst }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label for="budget_flexibility">Budget: </label>
+            <select id="budget_flexibility" name="budget_flexibility">
+                {% for option in budget_options %}
+                <option value = "{{ option }}" {% if preferences.budget_flexibility == option %}selected{% endif %}>
+                    {{ option|capfirst }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" style="margin-top: 15px; padding: 10px; width: 100%;">Get Suggestions</button>
+        </form>
+
+        <hr>
+        {% if error %}
+            <p style="color: red;">Error: {{ error }}</p>
+        {% elif suggestions %}
+        <h3>Found {{ suggestions|length }} Suggestions (via {{provider}}):</h3>
+        <ul style="max-height:300px; overflow-y:auto;">
+            {% for item in suggestions %}
+            <li><strong>{{ item.name }}</strong></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>Search a location on the map, adjust your preferences, and click 'Get Suggestions'.</p>
+        {% endif %}
+    </div>
 </div>
-
-
-<div id="map" style="height:600px;width:100%"></div>
-
 
 <script>
     let map;
@@ -34,8 +93,15 @@
         autocomplete.addListener("place_changed", () => {
             const place = autocomplete.getPlace();
             if (!place.geometry) return alert("No details available for that location");
+
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+
             map.setCenter(place.geometry.location);
             map.setZoom(12);
+
+            document.getElementById("suggestion-latitude").value = lat;
+            document.getElementById("suggestion-longitude").value = lng;
 
 
             //fetchPosts(place.geometry.location.lat(), place.geometry.location.lng());

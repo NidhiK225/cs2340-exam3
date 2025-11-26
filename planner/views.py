@@ -24,6 +24,8 @@ from urllib.parse import urlencode
 import requests
 from math import radians, cos
 from django.http import JsonResponse
+from .services.suggestions import suggest_activities
+
 
 # @login_required
 # @planner_required
@@ -38,11 +40,71 @@ from django.http import JsonResponse
 #     }
 #     return render(request, "planner/index.html", {"template_data": template_data})
 
+# @login_required
+# @planner_required
+# def map_view(request):
+#     return render(request, 'planner/map.html')
+
 @login_required
 @planner_required
-def map_view(request):
-    return render(request, 'planner/map.html')
+def trip_map_and_suggestions(request):
+    #trip = get_object_or_404(Trip, pk=pk, created_by=request.user)
+    suggestions = None
+    provider = None
+    error = None
+    vibe_options = ["relaxed", "balanced", "active"]
+    party_options = ["adults", "family", "kids"]
+    budget_options = ["conservative", "moderate", "splurge"]
 
+    default_preferences = {
+        "interests":"",
+        "vibe": "balanced",
+        "party": "adults",
+        "budget_flexibility": "moderate",
+    }
+
+    if request.method == "POST":
+        lat = request.POST.get("latitude")
+        lng = request.POST.get("longitude")
+        if not lat or not lng:
+            error = "Please search for a location on the map before getting suggestions."
+            preferences = default_preferences
+        else:
+            preferences = {
+                "interests": request.POST.get("interests", "").strip(),
+                "vibe": request.POST.get("vibe", "balanced").strip(),
+                "party": request.POST.get("party", "adults").strip(),
+                "budget_flexibility": request.POST.get("budget_flexibility", "moderate").strip(),
+            }
+            try:
+                res = suggest_activities(
+                    latitude = float(lat),
+                    longitude = float(lng),
+                    preferences = preferences,
+                    max_items = 8
+                )
+                suggestions = res.get("activities", [])
+                provider = res.get("provider")
+                error = res.get("error")
+
+            except Exception as e:
+                error = f"Suggestion service error. Check suggest_activities function. Error: {e}"
+    else:
+        preferences = default_preferences
+
+    return render (
+        request,
+        "planner/map.html",
+        {
+            "suggestions": suggestions,
+            "provider": provider,
+            "error": error,
+            "preferences": preferences,
+            "vibe_options": vibe_options,
+            "party_options": party_options,
+            "budget_options": budget_options,
+        },
+    )
 @login_required
 @planner_required
 def show(request, id):
