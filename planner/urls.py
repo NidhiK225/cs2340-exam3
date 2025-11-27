@@ -6,4 +6,5 @@ urlpatterns = [
     path("me/", views.my_profile, name="planner.my_profile"),
     path("me/edit/", views.edit_profile, name="planner.edit_profile"),
     path('map/', views.trip_map_and_suggestions, name = 'map'),
+    path('add-stop/', views.add_stop_to_trip, name='add_stop'),
 ]

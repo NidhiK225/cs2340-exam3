@@ -87,6 +87,44 @@
     </div>
 </div>
 
+<div id="add-stop-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:100;">
+    <div style="background:white; margin:10% auto; padding:30px; width:400px; border-radius:8px;">
+        <h3>Add Stop to Trip</h3>
+        <form id = "save-stop-form" method = "POST">
+            {% csrf_token %}
+
+            <input type="hidden" name="stop_latitude" id="modal-stop-lat">
+            <input type="hidden" name="stop_longitude" id="modal-stop-lng">
+
+            <label>Title:</label>
+            <input type="text" name="title" id="modal-title" readonly style="width:100%; margin-bottom:10px;"><br>
+
+            <label>Description:</label>
+            <textarea  name="description" id="modal-description" readonly style="width:100%; margin-bottom:15px;"></textarea><br>
+
+            <label>Cost:</label>
+            <input type="text" name="cost" id="modal-cost" readonly style="width:100%; margin-bottom:15px;"><br>
+
+            <label>Date for Stop:</label>
+            <input type="date" name="date" required style="width:100%; margin-bottom:10px;"><br>
+
+            <label>Select Trip:</label>
+            <select name="trip_id" id="modal-trip-select" required style = "width:100%; padding:8px;">
+                <option value="">-- Choose a Trip --</option>
+                {% for trip in user_trips %}
+                <option value = "{{ trip.pk }}"
+                    {% if forloop.first %}selected{% endif %}>
+                    {{ trip.title }}
+                </option>
+             {% endfor %}
+        </select>
+        <br><br>
+
+            <button type="submit">Save to Trip</button>
+            <button type = "button" onclick = "document.getElementById('add-stop-modal').style.display='none'">Cancel</button>
+        </form>
+    </div>
+</div>
 <script>
     let map;
     let markers = [];
@@ -126,6 +164,55 @@
 
 
     }
+
+    function openAddStopModal(title, description, cost) {
+        const modal = document.getElementById('add-stop-modal');
+        // const currentLat = document.getElementById('suggestion-latitude').value;
+        // const currentLng = document.getElementById('suggestion-longitude').value;
+
+        // if (!currentLat || !currentLng) {
+        //     alert("Please search for a location on the map first to set the stop's coordinates.");
+        //     return;
+        // }
+
+        //console.log("coords:", currentLat, currentLng);
+
+
+        document.getElementById('modal-title').value = title;
+        document.getElementById('modal-description').value = description;
+        document.getElementById('modal-cost').value = cost;
+        // document.getElementById('modal-stop-lat').value = currentLat;
+        // document.getElementById('modal-stop-lng').value = currentLng;
+
+        modal.style.display = 'block';
+    }
+
+    document.getElementById('save-stop-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = e.target;
+
+        fetch('{% url "add_stop" %}', {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                document.getElementById('add-stop-modal').style.display = 'none';
+                form.reset();
+            } else {
+                alert('Error adding stop: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+
+
 
 </script>
 <script src ="https://maps.googleapis.com/maps/api/js?key=AIzaSyCB1Yppcqoe9_A8euT_t-Pz2odNPTlBtw0&libraries=places&callback=initMap" async defer></script>

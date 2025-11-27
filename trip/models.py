@@ -45,3 +45,24 @@ class Trip(models.Model):
 #         trip_title = getattr(self.title, "title", "(no title)")
 #         username = getattr(self.created_by, "created_by", str(self.created_by))
 #         return f"Application by {username} for {trip_title}"
+
+
+class Stop(models.Model):
+    trip = models.ForeignKey(
+        'Trip',
+        on_delete = models.CASCADE,
+        related_name='stops'
+    )
+
+    title = models.CharField(max_length = 255)
+    description = models.TextField(blank = True)
+    cost = models.CharField(max_length = 50, blank = True)
+
+    date = models.DateField()
+
+    # latitude = models.DecimalField(max_digits = 9, decimal_places = 6)
+    # longitude = models.DecimalField(max_digits = 9, decimal_places =6)
+
+    created_at = models.DateTimeField(auto_now_add = True)
+    def __str__(self):
+        return f"{self.title} ({self.date})"

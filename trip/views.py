@@ -38,7 +38,7 @@ import json
 @planner_required
 def trip_dashboard(request):
     if request.user.is_planner:
-        trips = Trip.objects.filter(created_by=request.user)
+        trips = Trip.objects.filter(created_by=request.user).prefetch_related('stops')
     # ?applications = Application.objects.filter(trip__in=trips)
         return render(request, 'trip/dashboard.html', {'trips':trips})
     else:
