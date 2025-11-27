@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from accounts.decorators import roadtripper_required
 from .models import RoadTripper
-from .models import Link
+from .models import Link, Like
 from .forms import RoadTripperForm
 from django.db.models import Q, Count
 from django.urls import reverse
@@ -59,8 +59,25 @@ def create_trip_post(request):
 
 
 @login_required
+@roadtripper_required
 def trip_feed(request):
     posts = TripPost.objects.select_related("roadtripper").prefetch_related("tagged_friends").all().order_by("-created_at")
+    current_roadtripper = None
+    liked_post_ids = set()
+
+    if request.user.is_authenticated:
+        try:
+            current_roadtripper = RoadTripper.objects.get(user=request.user)
+        except RoadTripper.DoesNotExist:
+            pass
+
+    if current_roadtripper:
+        liked_post_ids = Like.objects.filter(user=current_roadtripper).values_list('post_id', flat=True)
+        liked_post_ids = set(liked_post_ids)
+
+    for post in posts:
+        post.is_liked = post.pk in liked_post_ids
+
     return render(request, "roadTripper/tripFeed.html", {"posts": posts})
 
 
@@ -189,3 +206,46 @@ def posts_api(request):
     #         print(f"Post by {post_data['username']} has tags: {post_data['taggedFriends']}")
     # print("----------------------------")
     return JsonResponse(data, safe = False)
+
+@require_POST
+def like_post(request, post_id):
+    post = get_object_or_404(TripPost, pk=post_id)
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Login required.'}, status=403)
+    
+    try:
+        current_roadtripper = RoadTripper.objects.get(user=request.user)
+    except RoadTripper.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'RoadTripper profile not found.'}, status=400)
+    
+    like_instance = Like.objects.filter(user=current_roadtripper, post=post)
+
+    if like_instance.exists():
+        like_instance.delete()
+        liked = False
+    else:
+        Like.objects.create(user=current_roadtripper, post=post)
+        liked = True
+
+    new_count = Like.objects.filter(post=post).count()
+    return JsonResponse({
+        'success': True, 
+        'new_like_count': new_count,
+        'liked_status': liked 
+    })
+
+    
+
+def get_comments_ajax(request, post_id):
+    post = get_object_or_404(TripPost, pk=post_id)
+
+    comments_list = [
+        {
+            'author_name': c.author.firstName,
+            'content': c.content,
+            'created_at': c.created_at.strftime("%b %d, %Y %H:%M"),
+        }
+        for c in comments_list
+    ]
+
+    return JsonResponse({'comments': comments_list})

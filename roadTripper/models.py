@@ -103,4 +103,40 @@ class TripPost(models.Model):
             return f"{self.roadtripper.firstName} {self.roadtripper.lastName} - {self.location}"
         return f"TripPost - {self.location or 'No Location'}"
 
+class Like(models.Model):
+    user = models.ForeignKey(
+        'roadTripper', 
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(
+        'TripPost', 
+        on_delete=models.CASCADE
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        # Ensures a user can only like a single post once
+        unique_together = ('user', 'post')
+
+    def __str__(self):
+        return f"{self.user.firstName} likes {self.post.location}"
+
+class Comment(models.Model):
+    post = models.ForeignKey(
+        'TripPost',
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    author =   models.ForeignKey(
+        'roadTripper',
+        on_delete=models.CASCADE,
+        related_name='user_comments'
+    )
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Comment by {self.author.firstName} on {self.post.location}"
