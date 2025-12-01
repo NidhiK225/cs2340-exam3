@@ -10,5 +10,5 @@ urlpatterns = [
     path('map/', views.map_view, name = 'map'),
     path('posts/', views.posts_api, name='posts_api'),
     path('post/<int:post_id>/like/', views.like_post, name='like_post'),
-    path('post/<int:post_id>/comments_ajax/', views.get_comments_ajax, name='get_comments_ajax'),
+    path('api/posts/<int:post_id>/comments/', views.comment_api_view, name='comment_api')
 ]

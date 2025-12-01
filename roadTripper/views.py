@@ -1,6 +1,7 @@
 # roadTripper/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from accounts.decorators import roadtripper_required
@@ -13,10 +14,11 @@ from urllib.parse import urlencode
 from .models import TripPost
 from .forms import TripPostForm
 from .forms import RoadTripperForm, TripPostForm  # include TripPostForm
-from .models import RoadTripper, TripPost  # include TripPost model
+from .models import RoadTripper, TripPost, Comment
 import requests
 from math import radians, cos
 from django.http import JsonResponse
+import json
 
 
 @login_required
@@ -234,18 +236,54 @@ def like_post(request, post_id):
         'liked_status': liked 
     })
 
-    
 
-def get_comments_ajax(request, post_id):
+@require_http_methods(["GET", "POST"])
+def comment_api_view(request, post_id):
     post = get_object_or_404(TripPost, pk=post_id)
 
-    comments_list = [
-        {
-            'author_name': c.author.firstName,
-            'content': c.content,
-            'created_at': c.created_at.strftime("%b %d, %Y %H:%M"),
-        }
-        for c in comments_list
-    ]
+    if request.method == "GET":
+        comments = post.comments.select_related('author').all()
+        comments_data = [
+            {
+                'id': comment.id,
+                'author_name': f"{comment.author.firstName} {comment.author.lastName}" if comment.author else "Deleted User",
+                'text': comment.content, 
+                'created_at': comment.created_at.strftime("%b %d, %Y %H:%M"),
+            }
+            for comment in comments
+        ]
+        return JsonResponse({'comments': comments_data})
+    
+    elif request.method == 'POST':
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'User must be logged in.'}, status=401)
+    
+        try:
+            current_roadtripper = RoadTripper.objects.get(user=request.user)
+        except RoadTripper.DoesNotExist:
+            return JsonResponse({
+                'success': False, 
+                'error': 'RoadTripper profile not found. Complete your profile first.'
+            }, status=400)
 
-    return JsonResponse({'comments': comments_list})
+        try:
+            data = json.loads(request.body)
+            comment_text = data.get('text', '').strip() 
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON format.'}, status=400)
+
+        if not comment_text:
+            return JsonResponse({'success': False, 'error': 'Comment text cannot be empty.'}, status=400)
+
+        new_comment = Comment.objects.create(
+            post=post,
+            author=current_roadtripper,
+            content=comment_text       
+        )
+        
+        return JsonResponse({
+            'success': True, 
+            'message': 'Comment created successfully',
+            'id': new_comment.id
+        }, status=201)
+        
