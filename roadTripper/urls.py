@@ -9,4 +9,6 @@ urlpatterns = [
     path('feed/', views.trip_feed, name='roadTripper.trip_feed'),
     path('map/', views.map_view, name = 'map'),
     path('posts/', views.posts_api, name='posts_api'),
+    path('post/<int:post_id>/like/', views.like_post, name='like_post'),
+    path('api/posts/<int:post_id>/comments/', views.comment_api_view, name='comment_api')
 ]

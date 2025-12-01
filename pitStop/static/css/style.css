@@ -234,3 +234,15 @@ body.is-home { background: var(--primary); color: #ffffff; }
 /* Toasts (messages) alignment with theme */
 .toast { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
 .toast .btn-close { filter: invert(0.5); }
+
+.heart-button-style {
+    cursor: pointer; 
+    user-select: none; 
+    padding: 2px;
+    border-radius: 4px;
+    transition: background-color 0.1s;
+}
+
+.heart-button-style:hover {
+    background-color: #f8d7da; 
+}

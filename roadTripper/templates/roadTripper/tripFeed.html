@@ -30,14 +30,236 @@
               {% endfor %}
             </div>
           {% endif %}
+          <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top mt-auto">
+              <span 
+                class="like-button heart-button-style small fw-bold" 
+                data-post-id="{{ post.pk }}"
+                id="like-action-{{ post.pk }}"
+              >
+               <span 
+                    class="me-1 {% if post.is_liked %}text-danger{% else %}text-dark{% endif %}" 
+                    id="heart-icon-{{ post.pk }}"
+                >
+                    {% if post.is_liked %}
+                        ❤
+                    {% else %}
+                        ❤
+                    {% endif %}
+                </span>
+                <span id="like-count-{{ post.pk }}">{{ post.like_set.count }}</span> 
+            <form id="like-form-{{ post.pk }}" method="POST" action="{% url 'like_post' post_id=post.pk %}" style="display:none;"> 
+              {% csrf_token %}
+            </form>
+          </div>
+          <a href="#" class="small text-primary me-3" 
+            data-bs-toggle="modal" 
+            data-bs-target="#commentModal" 
+            data-post-id="{{ post.pk }}"
+            data-post-title="Post by {{ post.roadtripper.firstName }}"
+            data-comment-url="{% url 'comment_api' post_id=post.pk %}"
+            style="text-decoration: none;">
+            💬 Comments ({{ post.comments.count }})
+          </a>
+        </div> 
+        <div class="card-footer text-muted small">
+          Posted: {{ post.created_at|date:"M d, Y H:i" }}
         </div>
-        <div class="card-footer text-muted small">{{ post.created_at|date:"M d, Y H:i" }}</div>
-      </div>
-    </div>
+        
+      </div> </div>
     {% endfor %}
   </div>
   {% else %}
     <p>No posts yet!</p>
   {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.like-button').forEach(clickableElement => {
+      clickableElement.addEventListener('click', function() {                
+                const postId = this.getAttribute('data-post-id');
+                const form = document.getElementById(`like-form-${postId}`); 
+                
+                
+                if (!form) {
+                    console.error('AJAX Error: Hidden form not found for Post ID:', postId);
+                    return; 
+                }
+                
+                const url = form.action;
+                const csrfToken = form.querySelector('input[name="csrfmiddlewaretoken"]').value; 
+                
+                clickableElement.style.pointerEvents = 'none'; 
+                clickableElement.style.opacity = 0.5;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken, 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => {
+                    clickableElement.style.pointerEvents = 'auto'; 
+                    clickableElement.style.opacity = 1;
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const countElement = document.getElementById(`like-count-${postId}`);
+                        const iconElement = document.getElementById(`heart-icon-${postId}`); 
+
+                        if (countElement) {
+                            countElement.textContent = data.new_like_count;
+                        }
+
+                        if (iconElement) {
+                            if (data.liked_status) {
+                                iconElement.classList.remove('text-dark');
+                                iconElement.classList.add('text-danger'); 
+                                iconElement.textContent = '❤';
+                            } else {
+                                iconElement.classList.remove('text-danger');
+                                iconElement.classList.add('text-dark');
+                                iconElement.textContent = '❤';
+                            }
+                        }
+                    } else {
+                        console.error('Liking failed on the server. Success was false.', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('AJAX Request Failed:', error);
+                    clickableElement.style.pointerEvents = 'auto'; 
+                    clickableElement.style.opacity = 1;
+                });
+        });
+    });
+
+    //comment 
+    const commentModalElement = document.getElementById('commentModal');
+
+    const commentPostIdInput = document.getElementById('comment-post-id');
+    const commentsList = document.getElementById('comments-list');
+    const commentForm = document.getElementById('comment-form');
+
+    let currentCommentUrl = '';
+
+    commentModalElement.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const postId = button.getAttribute('data-post-id');
+        const postTitle = button.getAttribute('data-post-title');
+        currentCommentUrl = button.getAttribute('data-comment-url');
+
+        commentPostIdInput.value = postId;
+        document.getElementById('commentModalLabel').textContent = `Comments for ${postTitle}`;
+
+        loadComments(currentCommentUrl);
+    });
+
+    function loadComments(url) {
+      commentsList.innerHTML = '<p class="text-center text-muted">Loading comments...</p>';
+      fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const postComments = data.comments; 
+        
+        commentsList.innerHTML = '';
+        
+        if (!postComments || postComments.length === 0) { 
+          commentsList.innerHTML = '<p class="text-center text-muted">No comments yet.</p>';
+          return;
+        } else {
+          postComments.forEach(comment => { 
+            const commentDiv = document.createElement('div');
+            commentDiv.classList.add('p-2', 'border-bottom');
+            commentDiv.innerHTML = `<strong>${comment.author_name}</strong> <span class="text-muted small">(${comment.created_at})</span><p>${comment.text}</p>`;
+            commentsList.appendChild(commentDiv);
+          });
+        }
+      }) 
+      .catch(error => {
+        commentsList.innerHTML = '<p class="text-center text-danger">Failed to load comments.</p>';
+        console.error('Error loading comments:', error);
+      });
+    }
+
+    commentForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const textInput = document.getElementById('comment-text-input');
+      const text = textInput.value.trim();
+      const feedbackDiv = document.getElementById('comment-feedback');
+
+      if (text === '') {
+        feedbackDiv.innerHTML = '<span class="text-danger">Comment cannot be empty.</span>';
+        return;
+      }
+
+      feedbackDiv.innerHTML = '<span class="text-primary">Submitting comment...</span>';
+      fetch(currentCommentUrl, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': commentForm.querySelector('input[name="csrfmiddlewaretoken"]').value,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: text })
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+          throw new Error(`You must be logged in to comment.`);
+          }
+        throw new Error('Failed to submit comment.');
+        }
+      return response.json();
+    })
+    .then(data => {
+      feedbackDiv.innerHTML = '<span class="text-success">Comment submitted successfully!</span>';
+      textInput.value = '';
+      loadComments(currentCommentUrl);
+    })
+    .catch(error => {
+      console.error('Error submitting comment:', error);
+      feedbackDiv.innerHTML = `<span class="text-danger">${error.message}</span>`;
+    });
+});
+});
+</script>
+
+<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="commentModalLabel">Comments</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="comments-list">
+          <p class="text-center text-muted">Loading comments...</p>
+        </div>
+        
+        <hr>
+        
+        <form id="comment-form">
+          {% csrf_token %}
+          <input type="hidden" name="post_id" id="comment-post-id">
+          <div class="mb-3">
+            <textarea class="form-control" name="text" id="comment-text-input" rows="3" placeholder="Write a comment..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Submit Comment</button>
+          <div id="comment-feedback" class="mt-2 small"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
