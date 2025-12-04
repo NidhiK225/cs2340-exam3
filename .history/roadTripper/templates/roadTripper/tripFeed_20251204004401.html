@@ -1,0 +1,301 @@
+{% extends 'pitStop/base.html' %}
+{% block content %}
+<div class="container py-3">
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Road Tripper Feed</h2>
+    <div>
+      <a href="{% url 'roadTripper:saved_posts' %}" class="btn btn-outline-warning btn-sm me-2">
+        🔖 Saved Posts
+      </a>
+      <a href="{% url 'roadTripper:create_trip_post' %}" class="btn btn-dark btn-sm">
+        + New Post
+      </a>
+    </div>
+  </div>
+
+  {% if posts %}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+    {% for post in posts %}
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        {% if post.photo %}
+          <img src="{{ post.photo.url }}" class="card-img-top" alt="Trip Photo" style="object-fit:cover;height:200px;">
+        {% endif %}
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="fw-semibold">{{ post.roadtripper.firstName }} {{ post.roadtripper.lastName }}</div>
+          </div>
+
+          <p class="card-text">{{ post.description }}</p>
+
+          {% if post.location %}
+            <div class="small text-muted">📍 {{ post.location }}</div>
+          {% endif %}
+
+          {% if post.tagged_friends.all %}
+            <div class="mt-2 small">
+              <span class="text-muted">With:</span>
+              {% for friend in post.tagged_friends.all %}
+                <span class="badge text-bg-light me-1">{{ friend.firstName }} {{ friend.lastName }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <!-- LIKE + SAVE ROW -->
+          <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+
+            <div>
+              <!-- LIKE -->
+              <span 
+                class="like-button heart-button-style small fw-bold" 
+                data-post-id="{{ post.pk }}"
+                id="like-action-{{ post.pk }}"
+              >
+                <span 
+                  class="me-1 {% if post.is_liked %}text-danger{% else %}text-dark{% endif %}" 
+                  id="heart-icon-{{ post.pk }}"
+                >
+                  ❤
+                </span>
+                <span id="like-count-{{ post.pk }}">{{ post.like_set.count }}</span> 
+              </span>
+
+              <form id="like-form-{{ post.pk }}" method="POST" action="{% url 'roadTripper:like_post' post_id=post.pk %}" style="display:none;">
+                {% csrf_token %}
+              </form>
+
+              <!-- SAVE -->
+              <span 
+                class="save-button small fw-bold ms-3" 
+                data-post-id="{{ post.pk }}"
+                style="cursor:pointer;"
+              >
+                <span 
+                  id="save-icon-{{ post.pk }}"
+                  class="{% if post.is_saved %}text-warning{% else %}text-dark{% endif %}"
+                >
+                  {% if post.is_saved %}🔖{% else %}📑{% endif %}
+                </span>
+              </span>
+
+              <form id="save-form-{{ post.pk }}" method="POST" action="{% url 'roadTripper:save_post' post_id=post.pk %}" style="display:none;">
+                {% csrf_token %}
+              </form>
+            </div>
+
+            <!-- COMMENTS -->
+            <a 
+              href="#" 
+              class="small text-primary"
+              data-bs-toggle="modal" 
+              data-bs-target="#commentModal" 
+              data-post-id="{{ post.pk }}"
+              data-post-title="Post by {{ post.roadtripper.firstName }}"
+              data-comment-url="{% url 'roadTripper:comment_api' post_id=post.pk %}"
+              style="text-decoration: none;"
+            >
+              💬 Comments ({{ post.comments.count }})
+            </a>
+
+          </div>
+        </div> 
+
+        <div class="card-footer text-muted small">
+          Posted: {{ post.created_at|date:"M d, Y H:i" }}
+        </div>
+      </div> 
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p>No posts yet!</p>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  // LIKE
+  document.querySelectorAll('.like-button').forEach(clickableElement => {
+    clickableElement.addEventListener('click', function() {                
+      const postId = this.getAttribute('data-post-id');
+      const form = document.getElementById(`like-form-${postId}`); 
+
+      if (!form) return;
+
+      const url = form.action;
+      const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value; 
+
+      clickableElement.style.pointerEvents = 'none'; 
+      clickableElement.style.opacity = 0.5;
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken, 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      })
+      .then(response => {
+        clickableElement.style.pointerEvents = 'auto'; 
+        clickableElement.style.opacity = 1;
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          const count = document.getElementById(`like-count-${postId}`);
+          const icon = document.getElementById(`heart-icon-${postId}`); 
+
+          if (count) count.textContent = data.new_like_count;
+
+          if (icon) {
+            if (data.liked_status) {
+              icon.classList.remove('text-dark');
+              icon.classList.add('text-danger');
+            } else {
+              icon.classList.remove('text-danger');
+              icon.classList.add('text-dark');
+            }
+          }
+        }
+      })
+      .catch(error => {
+        clickableElement.style.pointerEvents = 'auto'; 
+        clickableElement.style.opacity = 1;
+      });
+    });
+  });
+
+  // SAVE
+  document.querySelectorAll('.save-button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const postId = this.dataset.postId;
+      const form = document.getElementById(`save-form-${postId}`);
+
+      if (!form) return;
+
+      fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      })
+      .then(res => res.json())
+      .then(data => {
+        const icon = document.getElementById(`save-icon-${postId}`);
+
+        if (data.saved_status) {
+          icon.classList.remove("text-dark");
+          icon.classList.add("text-warning");
+          icon.textContent = "🔖";
+        } else {
+          icon.classList.remove("text-warning");
+          icon.classList.add("text-dark");
+          icon.textContent = "📑";
+        }
+      });
+    });
+  });
+
+  // COMMENT MODAL
+  const commentModalElement = document.getElementById('commentModal');
+  const commentPostIdInput = document.getElementById('comment-post-id');
+  const commentsList = document.getElementById('comments-list');
+  const commentForm = document.getElementById('comment-form');
+
+  let currentCommentUrl = '';
+
+  commentModalElement.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const postId = button.getAttribute('data-post-id');
+    const postTitle = button.getAttribute('data-post-title');
+    currentCommentUrl = button.getAttribute('data-comment-url');
+
+    commentPostIdInput.value = postId;
+    document.getElementById('commentModalLabel').textContent = `Comments for ${postTitle}`;
+    loadComments(currentCommentUrl);
+  });
+
+  function loadComments(url) {
+    commentsList.innerHTML = '<p class="text-center text-muted">Loading comments...</p>';
+    fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      commentsList.innerHTML = '';
+
+      if (!data.comments || data.comments.length === 0) {
+        commentsList.innerHTML = '<p class="text-center text-muted">No comments yet.</p>';
+        return;
+      }
+
+      data.comments.forEach(comment => {
+        const div = document.createElement('div');
+        div.classList.add('p-2', 'border-bottom');
+        div.innerHTML = `
+          <strong>${comment.author_name}</strong>
+          <span class="text-muted small">(${comment.created_at})</span>
+          <p>${comment.text}</p>
+        `;
+        commentsList.appendChild(div);
+      });
+    });
+  }
+
+  commentForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const textInput = document.getElementById('comment-text-input');
+    const text = textInput.value.trim();
+    const feedbackDiv = document.getElementById('comment-feedback');
+
+    if (!text) {
+      feedbackDiv.innerHTML = '<span class="text-danger">Comment cannot be empty.</span>';
+      return;
+    }
+
+    fetch(currentCommentUrl, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': commentForm.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text })
+    })
+    .then(response => response.json())
+    .then(() => {
+      textInput.value = '';
+      loadComments(currentCommentUrl);
+    });
+  });
+
+});
+</script>
+
+<!-- MODAL -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="commentModalLabel">Comments</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="comments-list"></div>
+        <hr>
+        <form id="comment-form">
+          {% csrf_token %}
+          <input type="hidden" id="comment-post-id">
+          <textarea class="form-control mb-3" id="comment-text-input" rows="3"></textarea>
+          <button type="submit" class="btn btn-primary w-100">Submit Comment</button>
+          <div id="comment-feedback" class="mt-2 small"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

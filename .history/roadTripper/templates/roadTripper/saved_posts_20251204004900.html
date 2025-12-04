@@ -1,0 +1,47 @@
+{% extends 'pitStop/base.html' %}
+{% block content %}
+
+<div class="container py-3">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">🔖 Your Saved Trips</h2>
+        <a href="{% url 'roadTripper.trip_feed' %}" class="btn btn-outline-dark btn-sm">
+            ← Back to Feed
+        </a>
+    </div>
+
+    {% if posts %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+
+        {% for post in posts %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                {% if post.photo %}
+                    <img src="{{ post.photo.url }}" class="card-img-top" style="object-fit:cover;height:200px;">
+                {% endif %}
+
+                <div class="card-body">
+                    <strong>{{ post.roadtripper.firstName }} {{ post.roadtripper.lastName }}</strong>
+                    <p>{{ post.description }}</p>
+
+                    {% if post.location %}
+                        <div class="small text-muted">📍 {{ post.location }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="card-footer text-muted small">
+                    Saved on your list • {{ post.created_at|date:"M d, Y" }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+        <p class="text-muted">You have not saved any trips yet.</p>
+    {% endif %}
+
+</div>
+
+{% endblock %}
