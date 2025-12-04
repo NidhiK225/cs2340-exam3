@@ -19,12 +19,16 @@ class Trip(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
-    roadTrippers = models.ManyToManyField(RoadTripper, related_name="roadTrippers")
-    numAvailSpots = models.PositiveIntegerField(default=0)
+    roadTrippers = models.ManyToManyField(RoadTripper, related_name="joined_trippers", blank="True")
+    numSignedUp = models.PositiveIntegerField(default=0)
 
-
+    @property
+    def spots_left(self):
+        return self.max_capacity - self.numSignedUp
+    
     def __str__(self):
         return self.title
+    
 
 class Stop(models.Model):
     trip = models.ForeignKey(

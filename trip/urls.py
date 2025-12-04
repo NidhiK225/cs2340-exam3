@@ -7,17 +7,6 @@ urlpatterns = [
     path("create/", views.trip_create, name="trips.create"),
     path("<int:pk>/edit/", views.trip_edit, name="trip.edit"),
     path("<int:pk>/suggestions/", views.trip_suggestions, name="trip.suggestions"),
-    path("<int:pk>/join_trip/", views.join_trip, name="trip.join_trip"),
-    # path("<int:pk>/recommendations/", views.job_recommendations, name="jobs.recommendations"),
-    # path("<int:pk>/recommendations/debug/", views.job_recommendations_debug, name="jobs.recommendations_debug"),
-    # path('apply/<int:job_id>/', views.apply_job, name='apply_job'),
-    # path('status/<int:job_id>/', views.application_status, name='application_status'),
-    # path('application/<int:application_id>/update_status/', views.update_status, name='update_status'),
-    # path('job/<int:job_id>/applications/', views.job_applications, name='job_applications'),
-    # path('application/<int:application_id>/update_status/', views.update_status, name='update_status'),
-
-
-
-
-
+    path("trips/<int:trip_id>/remove_from_trip/<int:rt_id>/", views.remove_from_trip, name="trip.remove_from_trip"),
+    path("trips/<int:trip_id>/add_to_trip/<int:rt_id>/", views.add_to_trip, name="trip.add_to_trip"),
 ]
