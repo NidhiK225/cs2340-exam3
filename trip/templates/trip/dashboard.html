@@ -29,7 +29,13 @@
       <a href="{% url 'trip.edit' trip.id %}" class="btn btn-sm btn-outline-secondary me-2">Edit</a>
       <a href="{% url 'trip.suggestions' trip.id %}" class="btn btn-sm btn-dark">AI Suggestions</a>
     </div>
-
+    <div class="d-flex align-items-center mt-3">
+      <p class="mb-0 lh-1 me-3"><strong>{{ trip.numAvailSpots }}</strong> Available Spots</p>
+      {% if user.is_roadTripper and trip.numAvailSpots > 0 %}
+        <a href="{% url 'trip.join_trip' trip.id %}" class="btn btn-primary btn-sm">Join Trip</a>
+      {% endif %}
+    </div>
+    
   </div>
 {% empty %}
   <p>You have no trips yet.</p>

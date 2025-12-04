@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from accounts.decorators import planner_required
+from accounts.decorators import planner_required, roadtripper_required
 from django.contrib import messages
 from .models import Trip
 from .forms import TripForm
@@ -33,16 +33,15 @@ import json
 #         "applied_trips_status": applied_trips_status,
 #     })
 
-# Recruiter dashboard (see own trips only)
+# Trip Dashboard
 @login_required
-@planner_required
 def trip_dashboard(request):
     if request.user.is_planner:
         trips = Trip.objects.filter(created_by=request.user).prefetch_related('stops')
-    # ?applications = Application.objects.filter(trip__in=trips)
-        return render(request, 'trip/dashboard.html', {'trips':trips})
-    else:
-        return redirect('trips.list')
+    elif request.user.is_roadTripper:
+        trips = Trip.objects.all()
+
+    return render(request, 'trip/dashboard.html', {'trips':trips})
 
 def trip_list(request):
     trips = Trip.objects.filter(created_by = request.user)
@@ -58,6 +57,7 @@ def trip_create(request):
             trip = form.save(commit=False)
             trip.planner = request.user
             trip.created_by = request.user
+            trip.numAvailSpots = trip.max_capacity
             trip.save()
             form.save_m2m()
             return redirect("trip.dashboard")
@@ -128,6 +128,17 @@ def trip_suggestions(request, pk):
             "budget_options": budget_options,
         },
     )
+
+# Join trip (only for RoadTrippers)
+@login_required
+@roadtripper_required
+def join_trip(request, pk):
+    trip = get_object_or_404(Trip, pk=pk)
+    trip.numAvailSpots -= 1
+    trip.save()
+
+
+    return redirect("trip.dashboard")
 
 #Apply Job
 # @login_required
