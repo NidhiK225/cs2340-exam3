@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from accounts.decorators import planner_required
-from django.contrib import messages
-from .models import Trip
+from django.urls import reverse
+from accounts.decorators import planner_required, roadtripper_required
+from .models import Trip, RoadTripper
 from .forms import TripForm
 from .services.suggestions import suggest_activities
 #from .services.recommendations import recommend_candidates_for_trip
@@ -10,39 +10,16 @@ from .services.suggestions import suggest_activities
 import requests
 import json
 
-# List trips (everyone can see)
-# def trip_list(request):
-#     qs = Job.objects.all().select_related("created_by").prefetch_related("s")
-#     f = JobFilter(request.GET, queryset=qs)
-#     selected_remote_types = [v for v in request.GET.getlist("remote_type") if v]
-#     applied_trips_preprocess = []
-#     if request.user.is_authenticated and request.user.is_roadTripper:
-#         applied_trips_preprocess = Application.objects.filter(user=request.user).values_list('trip_id', flat=True)
-
-#     applied_trips_status = applied_trips_preprocess
-#     applied_trips = json.dumps(list(applied_trips_preprocess))
-
-
-#     # Map and geocoding moved to dedicated map app for speed.
-#     return render(request, "trips/list.html", {
-#         "filter": f,
-#         "trips": f.qs,
-#         # map data intentionally omitted to keep page fast
-#         "selected_remote_types": selected_remote_types,
-#         "applied_trips": applied_trips,
-#         "applied_trips_status": applied_trips_status,
-#     })
-
-# Recruiter dashboard (see own trips only)
+# Trip Dashboard
 @login_required
-@planner_required
 def trip_dashboard(request):
     if request.user.is_planner:
         trips = Trip.objects.filter(created_by=request.user).prefetch_related('stops')
-    # ?applications = Application.objects.filter(trip__in=trips)
-        return render(request, 'trip/dashboard.html', {'trips':trips})
-    else:
-        return redirect('trips.list')
+    elif request.user.is_roadTripper:
+        trips = Trip.objects.all()
+
+    all_roadtrippers = RoadTripper.objects.all()
+    return render(request, 'trip/dashboard.html', {'trips':trips, 'all_roadtrippers':all_roadtrippers})
 
 def trip_list(request):
     trips = Trip.objects.filter(created_by = request.user)
@@ -128,6 +105,32 @@ def trip_suggestions(request, pk):
             "budget_options": budget_options,
         },
     )
+
+@login_required
+def remove_from_trip(request, trip_id, rt_id):
+    trip = get_object_or_404(Trip, id=trip_id)
+    roadtripper = get_object_or_404(RoadTripper, id=rt_id)
+    trip.roadTrippers.remove(roadtripper)
+    trip.numSignedUp -= 1
+    trip.save()
+
+    url = reverse("trip.dashboard") + f"#trip-{trip_id}"
+    return redirect(url)
+
+@login_required
+@roadtripper_required
+def add_to_trip(request, trip_id, rt_id):
+    trip = get_object_or_404(Trip, id=trip_id)
+    roadtripper = get_object_or_404(RoadTripper, id=rt_id)
+
+    trip.roadTrippers.add(roadtripper)
+    trip.numSignedUp += 1
+    trip.save()
+
+    url = reverse("trip.dashboard") + f"#trip-{trip_id}"
+    return redirect(url)
+
+
 
 #Apply Job
 # @login_required

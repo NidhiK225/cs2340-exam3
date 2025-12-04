@@ -51,32 +51,3 @@ class Planner(models.Model):
     @property
     def full_name(self):
         return f"{self.firstName} {self.lastName}"
-
-# class Interest(models.Model):
-#     """Specific travel interests (e.g., 'Hiking', 'Cuisine', 'History', 'Adventure')."""
-#     name = models.CharField(max_length=100, unique=True)
-#     def __str__(self): return self.name
-
-# class Destination(models.Model):
-#     """Desired travel locations (e.g., 'Kyoto', 'Patagonia', 'Paris')."""
-#     city = models.CharField(max_length=100, blank=True)
-#     country = models.CharField(max_length=100)
-    
-#     def __str__(self):
-#         if self.city:
-#             return f"{self.city}, {self.country}"
-#         return self.country
-
-# class Link(models.Model):
-#     url        = models.URLField()
-#     def __str__(self): return self.url
-
-# class Notification(models.Model):
-#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-#                              related_name="notifications")
-#     text = models.TextField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     is_read = models.BooleanField(default=False)
-
-#     class Meta:
-#         indexes = [models.Index(fields=["user", "-created_at"])]

@@ -38,22 +38,23 @@
 
             <!-- Always visible -->
             {% if user.is_authenticated %}
-              <!-- Planner-only links -->
-              {% if not user.is_staff and user.is_planner %}
+              {% if not user.is_staff %}
                 <a class="nav-link" href="{% url 'trip.dashboard' %}">Trip Dashboard</a>
-                <a class="nav-link" href="{% url 'planner.my_profile' %}">My Profile</a>
-                <a class="nav-link" href="{% url 'map' %}">Map</a>
-              {% endif %}
 
-              <!-- Road Tripper-only links -->
-              {% if not user.is_staff and user.is_roadTripper %}
-                <a class="nav-link" href="{% url 'roadTripper.trip_feed' %}">Trip Feed</a>
-                <a class="nav-link" href="{% url 'roadTripper.create_trip_post' %}">Create Trip</a>
-                <a class="nav-link" href="{% url 'map' %}">Map</a>
-                <a class="nav-link" href="{% url 'roadTripper.my_profile' %}">My Profile</a>
-              {% endif %}
+                <!-- Planner-only links -->
+                {% if user.is_planner %}
+                  <a class="nav-link" href="{% url 'planner.my_profile' %}">My Profile</a>
+                  <a class="nav-link" href="{% url 'map' %}">Map</a>
+                {% endif %}
 
-              {% if user.is_staff %}
+                <!-- Road Tripper-only links -->
+                {% if user.is_roadTripper %}
+                  <a class="nav-link" href="{% url 'roadTripper.trip_feed' %}">Trip Feed</a>
+                  <a class="nav-link" href="{% url 'roadTripper.create_trip_post' %}">Create Trip</a>
+                  <a class="nav-link" href="{% url 'map' %}">Map</a>
+                  <a class="nav-link" href="{% url 'roadTripper.my_profile' %}">My Profile</a>
+                {% endif %}
+              {% else %}
                 <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
               {% endif %}
 
