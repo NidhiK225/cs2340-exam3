@@ -1,0 +1,190 @@
+{% extends 'pitStop/base.html' %}
+{% block content %}
+<div class="container py-3">
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Road Tripper Feed</h2>
+    <div>
+      <a href="{% url 'saved_posts' %}" class="btn btn-outline-warning btn-sm me-2">
+        🔖 Saved Posts
+      </a>
+      <a href="{% url 'roadTripper.create_trip_post' %}" class="btn btn-dark btn-sm">
+        + New Post
+      </a>
+    </div>
+  </div>
+
+  {% if posts %}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+    {% for post in posts %}
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+
+        {% if post.photo %}
+          <img src="{{ post.photo.url }}" class="card-img-top" style="object-fit:cover;height:200px;">
+        {% endif %}
+
+        <div class="card-body">
+          <strong>{{ post.roadtripper.firstName }} {{ post.roadtripper.lastName }}</strong>
+          <p>{{ post.description }}</p>
+
+          {% if post.location %}
+            <div class="small text-muted">📍 {{ post.location }}</div>
+          {% endif %}
+
+          {% if post.tagged_friends.all %}
+            <div class="mt-2 small">
+              With:
+              {% for friend in post.tagged_friends.all %}
+                <span class="badge text-bg-light">{{ friend.firstName }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <!-- ❤️ LIKE + 🔖 SAVE -->
+          <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+            <div>
+
+              <!-- LIKE -->
+              <span 
+                class="like-button small fw-bold"
+                data-post-id="{{ post.pk }}"
+                id="like-action-{{ post.pk }}"
+                style="cursor:pointer;"
+              >
+                <span 
+                  id="heart-icon-{{ post.pk }}"
+                  class="{% if post.is_liked %}text-danger{% else %}text-dark{% endif %}"
+                >
+                  ❤
+                </span>
+                <span id="like-count-{{ post.pk }}">{{ post.like_set.count }}</span>
+              </span>
+
+              <form id="like-form-{{ post.pk }}" method="POST" action="{% url 'like_post' post_id=post.pk %}" style="display:none;"> 
+                {% csrf_token %}
+              </form>
+
+              <!-- SAVE (color toggle like the heart) -->
+              <span 
+                class="save-button small fw-bold ms-3"
+                data-post-id="{{ post.pk }}"
+                id="save-action-{{ post.pk }}"
+                style="cursor:pointer;"
+              >
+                <span 
+                  id="save-icon-{{ post.pk }}"
+                  class="{% if post.is_saved %}text-warning{% else %}text-dark{% endif %}"
+                >
+                  🔖
+                </span>
+              </span>
+
+              <form id="save-form-{{ post.pk }}" method="POST" action="{% url 'save_post' post_id=post.pk %}" style="display:none;">
+                {% csrf_token %}
+              </form>
+
+            </div>
+
+            <!-- COMMENTS -->
+            <a 
+              href="#" 
+              class="small text-primary"
+              data-bs-toggle="modal" 
+              data-bs-target="#commentModal" 
+              data-post-id="{{ post.pk }}"
+              data-post-title="Post by {{ post.roadtripper.firstName }}"
+              data-comment-url="{% url 'comment_api' post_id=post.pk %}"
+              style="text-decoration: none;"
+            >
+              💬 Comments ({{ post.comments.count }})
+            </a>
+          </div>
+        </div>
+
+        <div class="card-footer text-muted small">
+          {{ post.created_at|date:"M d, Y H:i" }}
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p>No posts yet!</p>
+  {% endif %}
+
+</div>
+
+<!-- SCRIPT -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  // ===== LIKE =====
+  document.querySelectorAll('.like-button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const postId = this.dataset.postId;
+      const form = document.getElementById(`like-form-${postId}`);
+
+      fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        const count = document.getElementById(`like-count-${postId}`);
+        const icon = document.getElementById(`heart-icon-${postId}`);
+
+        if (count) count.textContent = data.new_like_count;
+
+        if (icon) {
+          if (data.liked_status) {
+            icon.classList.remove('text-dark');
+            icon.classList.add('text-danger');
+          } else {
+            icon.classList.remove('text-danger');
+            icon.classList.add('text-dark');
+          }
+        }
+      });
+    });
+  });
+
+  // ===== SAVE (same exact behavior as LIKE) =====
+  document.querySelectorAll('.save-button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const postId = this.dataset.postId;
+      const form = document.getElementById(`save-form-${postId}`);
+
+      fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        const icon = document.getElementById(`save-icon-${postId}`);
+
+        if (icon) {
+          if (data.saved_status) {
+            icon.classList.remove('text-dark');
+            icon.classList.add('text-warning');
+          } else {
+            icon.classList.remove('text-warning');
+            icon.classList.add('text-dark');
+          }
+        }
+      });
+    });
+  });
+
+});
+</script>
+
+{% endblock %}

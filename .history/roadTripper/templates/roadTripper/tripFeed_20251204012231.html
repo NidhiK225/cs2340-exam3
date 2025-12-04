@@ -1,0 +1,200 @@
+{% extends 'pitStop/base.html' %}
+{% block content %}
+
+<!-- FONT AWESOME (if not already in base.html) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<div class="container py-3">
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Road Tripper Feed</h2>
+    <div>
+      <a href="{% url 'saved_posts' %}" class="btn btn-outline-warning btn-sm me-2">
+        <i class="fa-solid fa-bookmark"></i> Saved Posts
+      </a>
+      <a href="{% url 'roadTripper.create_trip_post' %}" class="btn btn-dark btn-sm">
+        + New Post
+      </a>
+    </div>
+  </div>
+
+  {% if posts %}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+    {% for post in posts %}
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+
+        {% if post.photo %}
+        <img src="{{ post.photo.url }}" class="card-img-top" style="object-fit:cover;height:200px;">
+        {% endif %}
+
+        <div class="card-body">
+          <strong>{{ post.roadtripper.firstName }} {{ post.roadtripper.lastName }}</strong>
+          <p>{{ post.description }}</p>
+
+          {% if post.location %}
+          <div class="small text-muted">📍 {{ post.location }}</div>
+          {% endif %}
+
+          {% if post.tagged_friends.all %}
+          <div class="mt-2 small">
+            With:
+            {% for friend in post.tagged_friends.all %}
+              <span class="badge text-bg-light">{{ friend.firstName }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <!-- LIKE + SAVE BAR -->
+          <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+
+            <div>
+
+              <!-- LIKE BUTTON -->
+              <span
+                class="like-button small fw-bold"
+                data-post-id="{{ post.pk }}"
+                style="cursor:pointer;"
+              >
+                <i
+                  id="heart-icon-{{ post.pk }}"
+                  class="fa-solid fa-heart {% if request.user in post.likes.all %}text-danger{% else %}text-dark{% endif %}"
+                ></i>
+                <span id="like-count-{{ post.pk }}">{{ post.likes.count }}</span>
+              </span>
+
+              <form id="like-form-{{ post.pk }}" method="POST"
+                    action="{% url 'like_post' post_id=post.pk %}" style="display:none;">
+                {% csrf_token %}
+              </form>
+
+
+              <!-- SAVE / BOOKMARK BUTTON -->
+              <span
+                class="save-button small fw-bold ms-3"
+                data-post-id="{{ post.pk }}"
+                style="cursor:pointer;"
+              >
+                <i
+                  id="save-icon-{{ post.pk }}"
+                  class="fa-solid fa-bookmark {% if request.user in post.saved_by.all %}text-warning{% else %}text-dark{% endif %}">
+                </i>
+              </span>
+
+              <form id="save-form-{{ post.pk }}" method="POST"
+                    action="{% url 'saved_posts' %}" style="display:none;">
+                {% csrf_token %}
+              </form>
+
+            </div>
+
+            <!-- COMMENT BUTTON -->
+            <a
+              href="#"
+              class="small text-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#commentModal"
+              data-post-id="{{ post.pk }}"
+              data-post-title="Post by {{ post.roadtripper.firstName }}"
+              data-comment-url="{% url 'comment_api' post_id=post.pk %}"
+              style="text-decoration: none;"
+            >
+              <i class="fa-regular fa-comment"></i>
+              Comments ({{ post.comments.count }})
+            </a>
+
+          </div>
+        </div>
+
+        <div class="card-footer text-muted small">
+          {{ post.created_at|date:"M d, Y H:i" }}
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">No posts yet.</p>
+  {% endif %}
+
+</div>
+
+<!-- JAVASCRIPT -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  // LIKE FUNCTION
+  document.querySelectorAll('.like-button').forEach(btn => {
+    btn.addEventListener('click', function() {
+
+      const postId = this.dataset.postId;
+      const form = document.getElementById(`like-form-${postId}`);
+
+      fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      .then(res => res.json())
+      .then(data => {
+
+        const count = document.getElementById(`like-count-${postId}`);
+        const icon  = document.getElementById(`heart-icon-${postId}`);
+
+        count.textContent = data.new_like_count;
+
+        if (data.liked_status) {
+          icon.classList.remove('text-dark');
+          icon.classList.add('text-danger');
+        } else {
+          icon.classList.remove('text-danger');
+          icon.classList.add('text-dark');
+        }
+      });
+    });
+  });
+
+
+
+  // SAVE FUNCTION (BOOKMARK)
+  document.querySelectorAll('.save-button').forEach(btn => {
+    btn.addEventListener('click', function() {
+
+      const postId = this.dataset.postId;
+      const form = document.getElementById(`save-form-${postId}`);
+
+      fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ post_id: postId })
+      })
+
+      .then(res => res.json())
+      .then(data => {
+
+        const icon = document.getElementById(`save-icon-${postId}`);
+
+        if (data.saved === true) {
+          icon.classList.remove('text-dark');
+          icon.classList.add('text-warning');
+        } else {
+          icon.classList.remove('text-warning');
+          icon.classList.add('text-dark');
+        }
+
+      });
+    });
+  });
+
+});
+</script>
+
+{% endblock %}
